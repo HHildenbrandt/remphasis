@@ -24,6 +24,17 @@ namespace {
 extern "C" {
 #endif
 
+  
+  EMP_EXTERN(void) emp_free_state(void**)
+  {
+  }
+
+
+  EMP_EXTERN(void) emp_invalidate_state(void**)
+  {
+  }
+
+
 
   EMP_EXTERN(const char*) emp_description() { return Description; }
   EMP_EXTERN(bool) emp_is_threadsafe() { return true; }
