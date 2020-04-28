@@ -50,8 +50,10 @@ namespace emphasis {
 #pragma omp parallel for if(model->is_threadsafe()) schedule(static, 100)
       for (int i = 0; i < static_cast<int>(trees.size()); ++i) {
         try {
-          const auto logf = model->loglik(pars, trees[i]);
-          const auto logg = model->sampling_prob(pars, trees[i]);
+          state_guard state(model);
+          state.invalidate_state();
+          const auto logf = model->loglik(state, pars, trees[i]);
+          const auto logg = model->sampling_prob(state, pars, trees[i]);
           w[i] = logf - logg;
         }
         catch (...) {

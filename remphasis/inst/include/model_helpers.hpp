@@ -103,16 +103,16 @@ namespace emphasis {
 
 
     template <typename Fun>
-    inline double wrap(Fun&& fun, void* model, double t, const param_t& pars, const tree_t& tree)
+    inline double wrap(Fun&& fun, void** state, const param_t& pars, const tree_t& tree)
     {
-      return fun(model, t, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
+      return fun(state, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
     }
 
 
     template <typename Fun>
-    inline double wrap(Fun&& fun, void* model, const param_t& pars, const tree_t& tree)
+    inline double wrap(Fun&& fun, void** state, double t, const param_t& pars, const tree_t& tree)
     {
-      return fun(model, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
+      return fun(state, t, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
     }
 
   }

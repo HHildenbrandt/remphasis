@@ -195,7 +195,12 @@ extern "C" {
     double nb = 0.0;
     double no = tree[0].n;
     double ne = 0.0;
-    struct nnn_t { double Nb = 0; double No = 0; double Ne = 0; };
+    struct nnn_t { 
+      nnn_t() = default;
+      nnn_t(double NB, double NO, double NE) : Nb(NB), No(NO), Ne(NE) {}
+      double Nb = 0; double No = 0; double Ne = 0; 
+    };
+    
     std::vector<nnn_t> nnn;
     for (unsigned i = 0; i < n; ++i) {
       const auto& node = tree[i];
@@ -203,7 +208,7 @@ extern "C" {
       const bool tip = detail::is_tip(node);
       const bool missing = !(extinction || tip);
       if (missing) {
-        nnn.push_back({ node.n, no, nb - ne });
+        nnn.push_back(nnn_t(node.n, no, nb - ne));
         mtree.push_back(node);
       }
       if (extinction) ++ne;

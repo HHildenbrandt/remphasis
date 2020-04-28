@@ -56,43 +56,22 @@ extern "C" {
     double t_ext;     /* +10e10 for present-day species. -1 for extinction nodes */
   };
 
-  typedef void* (*emp_create_func)();
-  typedef void (*emp_destroy_func)(void*);
-
   typedef const char* (*emp_description_func)();
   typedef bool (*emp_is_threadsafe_func)();
   typedef int (*emp_nparams_func)();
   typedef void (*emp_lower_bound_func)(double*);
   typedef void (*emp_upper_bound_func)(double*);
-  
-  typedef double (*emp_extinction_time_func)(void*, double, const double*, unsigned, const emp_node_t*);
-  typedef double (*emp_speciation_rate_func)(void*, double, const double*, unsigned, const emp_node_t*);
-  typedef double (*emp_speciation_rate_sum_func)(void*, double, const double*, unsigned, const emp_node_t*);
-  typedef double (*emp_sampling_prob_func)(void*, const double*, unsigned, const emp_node_t*);
-  typedef double (*emp_intensity_func)(void*, const double*, unsigned, const emp_node_t*);
-  typedef double (*emp_loglik_func)(void*, const double*, unsigned, const emp_node_t*);
-  
 
-  /************************************************************/
-  /* to be implemented by your DLL                            */  
-  /************************************************************/
-  /*
-  EMP_EXTERN(void*) emp_create_model();
-  EMP_EXTERN(void) emp_destroy_model(void*);
+  typedef void (*emp_free_state_func)(void**);
+  typedef void (*emp_invalidate_state_func)(void**);
 
-  EMP_EXTERN(const char*) emp_description();
-  EMP_EXTERN(bool) emp_is_threadsafe();
-  EMP_EXTERN(int) emp_nparams();
-  EMP_EXTERN(void) emp_lower_bounds(double* pars);
-  EMP_EXTERN(void) emp_upper_bounds(double* pars);
+  typedef double (*emp_extinction_time_func)(void**, double, const double*, unsigned, const emp_node_t*);
+  typedef double (*emp_speciation_rate_func)(void**, double, const double*, unsigned, const emp_node_t*);
+  typedef double (*emp_speciation_rate_sum_func)(void**, double, const double*, unsigned, const emp_node_t*);
+  typedef double (*emp_sampling_prob_func)(void**, const double*, unsigned, const emp_node_t*);
+  typedef double (*emp_intensity_func)(void**, const double*, unsigned, const emp_node_t*);
+  typedef double (*emp_loglik_func)(void**, const double*, unsigned, const emp_node_t*);
 
-  EMP_EXTERN(double) emp_extinction_time(void*, double t_speciation, const double* pars, unsigned n, const emp_node_t* tree);
-  EMP_EXTERN(double) emp_speciation_rate(void*, double t, const double* pars, unsigned n, const emp_node_t* tree);
-  EMP_EXTERN(double) emp_speciation_rate_sum(void*, double t, const double* pars, unsigned n, const emp_node_t* tree);
-  EMP_EXTERN(double) emp_sampling_prob(void*, const double* pars, unsigned n, const emp_node_t* tree);
-  EMP_EXTERN(double) emp_intensity(void*, const double* pars, unsigned n, const emp_node_t* tree);
-  EMP_EXTERN(double) emp_loglik(void*, const double* pars, unsigned n, const emp_node_t* tree);
-  */
 
 #ifdef __cplusplus
 }
