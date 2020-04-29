@@ -5,7 +5,7 @@
 #include <limits>
 #include <memory>
 #include <vector>
-#include "plugin.h"   // node_t 
+#include "plugin.hpp"
 
 
 namespace emphasis {
@@ -13,7 +13,6 @@ namespace emphasis {
   extern const int default_nlopt_algo;  // resolves to NLOPT_SBPLX
   static constexpr int default_max_missing_branches = 10000;
   static constexpr double default_max_aug_lambda = 500.0;
-  static constexpr double huge = std::numeric_limits<double>::max();
 
 
   class emphasis_error : public std::runtime_error
@@ -24,26 +23,7 @@ namespace emphasis {
   };
 
 
-  using param_t = std::vector<double>;    // unspecific parameter set
   using brts_t = std::vector<double>;     // input tree
-
-  // row in tree-matrix
-  // for c++ this is wasteful but all double
-  // makes it easier to represent a tree as
-  // R-matrix
-  struct node_t {
-    node_t() = default;
-    node_t(double B, double N, double T) : brts(B), n(N), t_ext(T) {}
-    double brts = 0;
-    double n = 0;         // n[i] = number of species in [time_i-1, time_i)
-    double t_ext = 0;     // t_ext_tip for tips, t_ext_extinct extinction nodes
-  };
-  constexpr double t_ext_tip = 10e10;     // t_ext for present nodes
-  constexpr double t_ext_extinct = 0.0;   // t_ext for extinction nodes
-
-
-  // tree, sorted by node_t::time
-  using tree_t = std::vector<node_t>;
 
 
   // results from e

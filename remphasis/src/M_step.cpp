@@ -101,7 +101,7 @@ namespace emphasis {
                   int num_threads)
   {
     if (num_threads <= 0) num_threads = std::thread::hardware_concurrency();
-    num_threads = std::max(1, std::min(num_threads, static_cast<int>(std::thread::hardware_concurrency())));
+    num_threads = std::min(num_threads, static_cast<int>(std::thread::hardware_concurrency()));
     omp_set_num_threads(num_threads);
     auto T0 = std::chrono::high_resolution_clock::now();
     nlopt_data sd{ model, trees, weights };

@@ -1,7 +1,6 @@
 #include <memory>
 #include <limits>
 #include <algorithm>
-#include "emphasis.hpp"
 #include "plugin.h"
 #include "model_helpers.hpp"
 
@@ -15,45 +14,8 @@ namespace {
   constexpr int Npars = 4;
   constexpr const char* Description = R"descr(rpd5 model, dynamic link library.)descr";
 
-  using reng_t = std::default_random_engine;
+  using reng_t = std::mt19937_64;   // we need doubles
   static thread_local reng_t reng_ = emphasis::detail::make_random_engine_low_entropy<reng_t>();
-
-
-  using pd_t = std::vector<double>;
-  pd_t* state_cast(void** state) 
-  { 
-    return reinterpret_cast<pd_t*>(*state); 
-  }
-
-  
-  const node_t* tree_cast(const emp_node_t* etree)
-  {
-    return reinterpret_cast<const node_t*>(etree);
-  }
-
-
-  const pd_t& recalc_pd(pd_t* pd, unsigned n, const node_t* tree)
-  {
-    if (pd->empty()) {
-      // invalid
-      pd->reserve(n);
-      double sum = 0.0;
-      double brts0 = 0.0;
-      double ni = tree[0].n;
-      for (unsigned i = 0; i < n; ++i) {
-        double brts = tree[i].brts;
-        if (detail::is_missing(tree[i])) {
-          sum += (brts - brts0) * ni++;
-          brts0 = brts;
-        }
-        pd->push_back(sum);
-      }
-      sum += (tree[n - 1].brts - brts0) * ni;
-      pd->push_back(sum);
-    }
-    return *pd;
-  }
-
 
 }
 
@@ -63,59 +25,31 @@ extern "C" {
 #endif
 
 
-  EMP_EXTERN(void) emp_free_state(void** state)
-  {
-    auto pd = state_cast(state);
-    if (pd) {
-      delete pd;
-      *state = nullptr;
-    }
-  }
-
-
-  EMP_EXTERN(void) emp_invalidate_state(void** state)
-  {
-    auto pd = state_cast(state);
-    if (nullptr == pd) {
-      pd = new std::vector<double>();
-    }
-    pd->clear();
-    *state = pd;
-  }
-
-
   EMP_EXTERN(const char*) emp_description() { return Description; }
   EMP_EXTERN(bool) emp_is_threadsafe() { return true; }
   EMP_EXTERN(int) emp_nparams() { return Npars; }
 
 
-  EMP_EXTERN(double) emp_speciation_rate(void** state, double t, const double* pars, unsigned n, const emp_node_t* etree)
+  EMP_EXTERN(double) emp_speciation_rate(void** state, double t, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    auto tree = tree_cast(etree);
-    auto pd = recalc_pd(state_cast(state), n, tree);
     auto it = std::lower_bound(tree, tree + n, t, detail::node_less{});
-    const double p = pd[std::distance(tree, it)];
-    const double N = it->n;
-    const double lambda = pars[1] + pars[2] * N + pars[3] * p / N;
-    return lambda;
+    it = std::max(it, tree + n - 1);
+    const double lambda = pars[1] + pars[2] * it->n + pars[3] * it->pd / it->n;
+    return std::max(0.0, lambda);
   }
 
 
-  EMP_EXTERN(double) emp_speciation_rate_sum(void** state, double t, const double* pars, unsigned n, const emp_node_t* etree)
+  EMP_EXTERN(double) emp_speciation_rate_sum(void** state, double t, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    auto tree = tree_cast(etree);
-    auto pd = recalc_pd(state_cast(state), n, tree);
     auto it = std::lower_bound(tree, tree + n, t, detail::node_less{});
-    const double p = pd[std::distance(tree, it)];
-    const double N = it->n;
-    const double lambda = pars[1] + pars[2] * N + pars[3] * p / N;
-    return lambda * N * (1.0 - std::exp(-pars[0] * (tree[n - 1].brts - t)));
+    it = std::max(it, tree + n - 1);
+    const double lambda = std::max(0.0, pars[1] + pars[2] * it->n + pars[3] * it->pd / it->n);
+    return lambda * it->n * (1.0 - std::exp(-pars[0] * (tree[n - 1].brts - t)));
   }
 
 
-  EMP_EXTERN(double) emp_extinction_time(void**, double t_speciation, const double* pars, unsigned n, const emp_node_t* etree)
+  EMP_EXTERN(double) emp_extinction_time(void**, double t_speciation, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    auto tree = tree_cast(etree);
     return t_speciation + detail::trunc_exp(0, tree[n - 1].brts - t_speciation, pars[0], reng_);
   }
 
@@ -126,10 +60,8 @@ extern "C" {
   }
 
 
-  EMP_EXTERN(double) emp_intensity(void** state, const double* pars, unsigned n, const emp_node_t* etree)
+  EMP_EXTERN(double) emp_intensity(void** state, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    auto tree = tree_cast(etree);
-    auto pd = recalc_pd(state_cast(state), n, tree);
     const double max_brts = tree[n - 1].brts;
     const double c2 = pars[3];
     const double c3 = std::exp(-pars[0] * max_brts);
@@ -150,10 +82,8 @@ extern "C" {
   }
 
 
-  EMP_EXTERN(double) emp_loglik(void** state, const double* pars, unsigned n, const emp_node_t* etree)
+  EMP_EXTERN(double) emp_loglik(void** state, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    auto tree = tree_cast(etree);
-    auto pd = recalc_pd(state_cast(state), n, tree);
     double sum_inte = 0;
     auto sum_rho = detail::log_sum{};
     auto prev_sum_rho = detail::log_sum{};
@@ -180,17 +110,16 @@ extern "C" {
       }
       sum_inte += inte;
       prev_sum_rho = sum_rho;
-      prev_pd = pd[i];
+      prev_pd = node.pd;
     }
     double log_lik = prev_sum_rho.result() - sum_inte;
     return log_lik;
   }
 
 
-  EMP_EXTERN(double) emp_sampling_prob(void** state, const double* pars, unsigned n, const emp_node_t* etree)
+  EMP_EXTERN(double) emp_sampling_prob(void** state, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    auto tree = tree_cast(etree);
-    double logg = -emp_intensity(state, pars, n, etree);
+    double logg = -emp_intensity(state, pars, n, tree);
     tree_t mtree;
     double nb = 0.0;
     double no = tree[0].n;
@@ -216,13 +145,11 @@ extern "C" {
       if (missing) ++nb;
     }
     void* tmp = nullptr;
-    emp_invalidate_state(&tmp);
     for (size_t i = 0; i < mtree.size(); ++i) {
       const auto lambda = emp_speciation_rate(&tmp, mtree[i].brts, pars, static_cast<unsigned>(mtree.size()), reinterpret_cast<const emp_node_t*>(mtree.data()));
       const auto lifespan = mtree[i].t_ext - mtree[i].brts;
       logg += std::log(nnn[i].Nb * pars[0] * lambda) - pars[0] * lifespan - std::log(2.0 * nnn[i].No + nnn[i].Ne);
     }
-    emp_invalidate_state(state);
     return logg;
   }
 

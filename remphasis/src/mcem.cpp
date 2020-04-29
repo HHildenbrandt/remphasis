@@ -18,8 +18,6 @@
 
 namespace emphasis {
 
-
-
   mcem_t mcem(int N,      // number of augmented trees
               const param_t& pars,
               const brts_t& brts,
@@ -37,7 +35,7 @@ namespace emphasis {
     EM.e = E_step(N, pars, brts, model, soc, max_missing, max_lambda, num_threads);
     // optimize
     if (!EM.e.trees.empty()) {
-      EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, static_cast<nlopt_algorithm>(algo));
+      EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, algo, num_threads);
     }
     return EM;
   }

@@ -1,12 +1,12 @@
 #include "plugin.hpp"
 #include "emphasis.hpp"
 #include "model_helpers.hpp"
-#include "dyn_wrapper..hpp"
+#include "dyn_wrapper.hpp"
 
 
 #define emp_local_stringify(a) #a
-#define emp_local_load_address(name) \
-name ## _ = (dynlib_.get_address<emp_ ## name ## _func>(emp_local_stringify(emp_ ## name)))
+#define emp_local_load_address(name, optional) \
+name ## _ = (dynlib_.get_address<emp_ ## name ## _func>(emp_local_stringify(emp_ ## name), optional))
 
 
 namespace emphasis {
@@ -17,39 +17,39 @@ namespace emphasis {
     dyn_model_t(const std::string& DLL)
     : dynlib_(DLL)
     {
-      emp_local_load_address(free_state);
-      emp_local_load_address(invalidate_state);
-      emp_local_load_address(extinction_time);
-      emp_local_load_address(speciation_rate);
-      emp_local_load_address(speciation_rate_sum);
-      emp_local_load_address(sampling_prob);
-      emp_local_load_address(intensity);
-      emp_local_load_address(loglik);
-      emp_local_load_address(lower_bound);
-      emp_local_load_address(upper_bound);
-      emp_local_load_address(nparams);
-      emp_local_load_address(is_threadsafe);
-      emp_local_load_address(description);
+      emp_local_load_address(description, true);
+      emp_local_load_address(nparams, false);
+      emp_local_load_address(is_threadsafe, true);
+      emp_local_load_address(free_state, true);
+      emp_local_load_address(invalidate_state, true);
+      emp_local_load_address(extinction_time, false);
+      emp_local_load_address(speciation_rate, false);
+      emp_local_load_address(speciation_rate_sum, false);
+      emp_local_load_address(sampling_prob, false);
+      emp_local_load_address(intensity, false);
+      emp_local_load_address(loglik, false);
+      emp_local_load_address(lower_bound, true);
+      emp_local_load_address(upper_bound, true);
     }
 
     ~dyn_model_t() override {}
 
     void free_state(void** state) const override {
-      return free_state_(state);
+      if (free_state_) free_state_(state);
     }
 
     void invalidate_state(void** state) const override {
-      return invalidate_state_(state);
+      if (invalidate_state_) invalidate_state_(state);
     }
 
     const char* description() const override 
     { 
-      return description_(); 
+      return (description_) ? description_() : "not set"; 
     }
     
     bool is_threadsafe() const override 
     { 
-      return is_threadsafe_(); 
+      return (is_threadsafe_) ? is_threadsafe_() : false; 
     }
     
     int nparams() const override 
@@ -83,16 +83,22 @@ namespace emphasis {
 
     param_t lower_bound() const override
     {
-      param_t p(nparams());
-      lower_bound_(p.data());
-      return p;
+      if (lower_bound_) {
+        param_t p(nparams());
+        lower_bound_(p.data());
+        return p;
+      }
+      return param_t();
     }
 
     param_t upper_bound() const override
     {
-      param_t p(nparams());
-      upper_bound_(p.data());
-      return p;
+      if (upper_bound_) {
+        param_t p(nparams());
+        upper_bound_(p.data());
+        return p;
+      }
+      return param_t();
     }
 
   private:

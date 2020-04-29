@@ -6,11 +6,7 @@
 #include "plugin.hpp"
 #include "augment_tree.hpp"
 #include "model_helpers.hpp"
-
-
-#ifdef EMP_AUG_DEBUG_SEED
-static std::atomic<size_t> debug_seed{ EMP_AUG_DEBUG_SEED };
-#endif
+#include "state_guard.hpp"
 
 
 namespace emphasis {
@@ -23,8 +19,7 @@ namespace emphasis {
     double get_next_bt(const tree_t& tree, double cbt)
     {
       auto it = std::upper_bound(tree.cbegin(), tree.cend(), cbt, detail::node_less{});
-      assert(it != tree.end());
-      return it->brts;
+      return (it != tree.cend()) ? it->brts : tree.back().brts;
     }
 
 
@@ -40,12 +35,12 @@ namespace emphasis {
       tree.reserve(tree.size() + 2);   // keep iterators valid
       auto first = std::lower_bound(tree.begin(), tree.end(), t_spec, detail::node_less{});
       auto n = (first != tree.begin()) ? n_after(first - 1) : tree.front().n;
-      first = tree.insert(first, node_t(t_spec, n, t_ext));
+      first = tree.insert(first, detail::make_node(t_spec, n, t_ext));
       // recalculate dirty range
       for (++first; first->brts < t_ext; ++first) {
         first->n = n_after(first - 1);
       }
-      tree.insert(first, { t_ext, n_after(first - 1), t_ext_extinct });
+      tree.insert(first, detail::make_extinct_node(t_ext, n_after(first - 1)));
     }
 
 

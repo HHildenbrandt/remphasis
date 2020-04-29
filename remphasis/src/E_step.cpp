@@ -9,6 +9,7 @@
 #include "emphasis.hpp"
 #include "augment_tree.hpp"
 #include "plugin.hpp"
+#include "state_guard.hpp"
 #include "model_helpers.hpp"
 
 
@@ -72,6 +73,22 @@ namespace emphasis {
       return w;
     }
 
+
+    void calculate_pd(tree_t& tree)
+    {
+      double sum = 0.0;
+      double brts0 = 0.0;
+      double ni = tree[0].n;
+      for (auto& node : tree) {
+        const double brts = node.brts;
+        if (detail::is_missing(node)) {
+          sum += (brts - brts0) * ni++;
+          brts0 = brts;
+        }
+        node.pd = sum;
+      }
+    }
+
   }
 
 
@@ -85,7 +102,7 @@ namespace emphasis {
                   int num_threads)
   {
     if (num_threads <= 0) num_threads = std::thread::hardware_concurrency();
-    num_threads = std::max(1, std::min(num_threads, static_cast<int>(std::thread::hardware_concurrency())));
+    num_threads = std::min(num_threads, static_cast<int>(std::thread::hardware_concurrency()));
     omp_set_num_threads(num_threads);
     std::mutex mutex;
     std::atomic<bool> stop{ false };    // non-handled exception
@@ -100,6 +117,7 @@ namespace emphasis {
           // reuse tree from pool
           auto& pooled = pooled_tree;
           emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pooled);
+          calculate_pd(pooled);
           std::lock_guard<std::mutex> _(mutex);
           E.trees.emplace_back(pooled.cbegin(), pooled.cend());
         }

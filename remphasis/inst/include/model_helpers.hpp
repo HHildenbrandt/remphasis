@@ -1,12 +1,13 @@
 #ifndef EMPHASIS_MODEL_HELPRES_HPP_INCLUDED
 #define EMPHASIS_MODEL_HELPRES_HPP_INCLUDED
 
+#include <limits>
 #include <cmath>
 #include <random>
 #include <array>
 #include <chrono>
 #include <thread>
-#include "emphasis.hpp"
+#include "plugin.hpp"
 
 
 #ifndef EMPHASIS_LOGSUM_LOWER_TRESHOLD
@@ -22,6 +23,7 @@ namespace emphasis {
 
   namespace detail {
 
+    static constexpr double huge = std::numeric_limits<double>::max();
 
     // returns low-entropy 512 bit array for seed sequence
     // based on std::chrono::high_resolution_clock.
@@ -58,6 +60,20 @@ namespace emphasis {
     inline bool is_missing(const node_t& node) { return !(is_extinction(node) || is_tip(node)); }
 
 
+    inline node_t make_node(double t, double n, double t_ext)
+    {
+      node_t tmp; tmp.brts = t; tmp.n = n; tmp.t_ext = t_ext; tmp.pd = 0.0;
+      return tmp;
+    }
+
+
+    inline node_t make_extinct_node(double t, double n)
+    { 
+      node_t tmp; tmp.brts = t; tmp.n = n; tmp.t_ext = t_ext_extinct; tmp.pd = 0.0;
+      return tmp;
+    }
+
+
     struct node_less
     {
       bool operator()(const node_t& a, const node_t& b) const noexcept { return a.brts < b.brts; };
@@ -73,14 +89,12 @@ namespace emphasis {
 
       void operator+=(double val)
       {
-        if (true) { //(val > 0) {
-          if ((prod_ < EMPHASIS_LOGSUM_LOWER_TRESHOLD) || (prod_ > EMPHASIS_LOGSUM_UPPER_TRESHOLD)) {
-            sum_ += std::log(prod_) + std::log(val);
-            prod_ = 1;
-          }
-          else {
-            prod_ *= val;
-          }
+        if ((prod_ > EMPHASIS_LOGSUM_LOWER_TRESHOLD) && (prod_ > EMPHASIS_LOGSUM_UPPER_TRESHOLD)) {
+          prod_ *= val;
+        }
+        else {
+          sum_ += std::log(prod_) + std::log(val);
+          prod_ = 1;
         }
       }
 
