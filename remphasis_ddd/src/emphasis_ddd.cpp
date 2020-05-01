@@ -16,8 +16,7 @@ namespace {
 
   using reng_t = std::mt19937_64;   // we need doubles
   static thread_local reng_t reng_ = emphasis::detail::make_random_engine_low_entropy<reng_t>();
-
-  }
+}
 
 
 #ifdef __cplusplus
