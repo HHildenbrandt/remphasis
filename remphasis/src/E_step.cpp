@@ -43,7 +43,10 @@ namespace emphasis {
     }
 
 
-    std::vector<double> w(param_t pars, const std::vector<tree_t>& trees, const Model* model)
+    std::vector<double> w(param_t pars, 
+                          const std::vector<tree_t>& trees, 
+                          const Model* model,
+                          double& fhat)
     {
       std::vector<double> w(trees.size(), 0.0);
       std::mutex mutex;
@@ -66,14 +69,23 @@ namespace emphasis {
         std::rethrow_exception(eptr);
       }
       auto it = std::max_element(w.cbegin(), w.cend());
+      fhat = 0.f;
+      double mult = 1.0 / w.size();
       if (it != w.cend()) {
         const auto max_w = *it;
-        for (auto& x : w) x = std::exp(x - max_w);
+        for (auto& x : w) {
+          if(x > 700) { // overflow
+            fhat = detail::huge;
+          } else if(x > -700) {  // underflow if x < -700 --> exp(-700) ~ 0
+            fhat += std::exp(x) * mult;
+          }
+          
+          x = std::exp(x - max_w);
+        }
       }
       return w;
     }
-
-
+    
     void calculate_pd(tree_t& tree)
     {
       double sum = 0.0;
@@ -139,7 +151,7 @@ namespace emphasis {
     if (nullptr != eptr) {
       std::rethrow_exception(eptr);
     }
-    E.weights = w(pars, E.trees, model);
+    E.weights = w(pars, E.trees, model, E.fhat);
     // remove 'impossible' trees
     auto it = E.trees.begin();
     for (size_t i = 0; i < E.weights.size(); ++i) {

@@ -1,11 +1,11 @@
 Package: remphasis
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
-Version: 1.0
-Date: 2020-04-26
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: One paragraph description of what the package does as one or more full sentences.
+Title: Expectation Maximization on Phylogenetic Applications with Simulations and Importance Sampling
+Version: 0.1.1
+Authors@R: c(person("Francisco","Richter", email = "f.richter@rug.nl", role = c("aut", "cre")),
+                person("Thijs","Janzen", email = "thijsjanzen@gmail.com", role=c("ctb")),
+                person("Hanno","Hildenbrandt", email = "h.hildenbrandt@rug.nl", role = c("ctb")))
+Description:  Set of statistical tools for the study of diversification of species and ecological drivers of macro-evolution.
 License: GPL (>= 2)
 Depends: nloptr
 Imports: Rcpp (>= 1.0.1), nloptr

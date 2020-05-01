@@ -17,7 +17,7 @@ DataFrame unpack(const emphasis::tree_t& tree)
 }
 
 
-// [[Rcpp::export(name = "mcem")]]
+// [[Rcpp::export(name = "mcem_cpp")]]
 List rcpp_mcem(const NumericVector& brts_i,       
                const NumericVector& init_pars_i,      
                int sample_size,                       
@@ -96,5 +96,7 @@ List rcpp_mcem(const NumericVector& brts_i,
   }
   ret["estimates"] = NumericVector(mcem.m.estimates.begin(), mcem.m.estimates.end());
   ret["nlopt"] = mcem.m.opt;
+  ret["fhat"]  = mcem.e.fhat;
+  ret["time"]  = mcem.e.elapsed + mcem.m.elapsed;
   return ret;
 }
