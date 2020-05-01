@@ -17,7 +17,7 @@ DataFrame unpack(const emphasis::tree_t& tree)
 }
 
 
-// [[Rcpp::export(name = "mcem_cpp")]]
+// [[Rcpp::export(name = "em_cpp")]]
 List rcpp_mcem(const NumericVector& brts_i,       
                const NumericVector& init_pars_i,      
                int sample_size,                       

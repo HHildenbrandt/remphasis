@@ -135,10 +135,10 @@ mcEM_step <- function(brts,
   times = NULL
   while (sde > tol) {
     i <- i + 1
-    results = remphasis::e_and_m_step(brts,
+    results = remphasis::em_cpp(brts,
                                   pars,
                                   sample_size,                       
-                                  model,             
+                                  locate_plugin(model),             
                                   soc,                           
                                   max_missing,               
                                   max_lambda,             
@@ -177,48 +177,13 @@ mcEM_step <- function(brts,
   return(list(mcem = mcem))
 }
 
-get_required_sampling_size <- function(M, tol=.05){
-  n <- M$sample_size
-  f<-  M$fhat
-  hlp<-MASS:::rlm(f~I(1/n),weights = n)
-  ab<-coef(hlp)
+get_required_sampling_size <- function(M, tol = .05){
+  n <-  M$sample_size
+  f <-  M$fhat
+  hlp <- MASS:::rlm(f~I(1 / n), weights = n)
+  ab <- coef(hlp)
   
-  f.r<-ab[1]-tol
-  n.r<-ceiling(ab[2]/(f.r-ab[1]))
+  f.r <- ab[1]-tol
+  n.r <- ceiling(ab[2] / (f.r-ab[1]))
   return(n.r)
 }
-
-e_and_m_step <- function(brts,
-                         pars,
-                         sample_size,                       
-                         model,             
-                         soc,                           
-                         max_missing,               
-                         max_lambda,             
-                         lower_bound,  
-                         upper_bound,  
-                         xtol = 0.001,                     
-                         num_threads,
-                         return_trees,
-                         verbose) 
- {
-    return(remphasis::mcem_cpp(brts,
-                               pars,
-                               sample_size,
-                               locate_plugin(model),
-                               soc,                           
-                               max_missing,               
-                               max_lambda,             
-                               lower_bound,  
-                               upper_bound,  
-                               xtol = 0.001,                     
-                               num_threads,
-                               return_trees,
-                               verbose))
-}
-
-
-  
-
-
-
