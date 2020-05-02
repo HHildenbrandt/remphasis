@@ -82,6 +82,7 @@ namespace emphasis {
           
           x = std::exp(x - max_w);
         }
+        fhat = std::log(fhat);
       }
       return w;
     }

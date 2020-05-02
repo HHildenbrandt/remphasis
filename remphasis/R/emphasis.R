@@ -150,7 +150,7 @@ mcEM_step <- function(brts,
                                  verbose)
     
     mcem <- rbind(mcem, data.frame(pars = results$estimates,
-                                   fhat = results$ll,
+                                   fhat = results$fhat,
                                    sample_size = sample_size))
     
     if (verbose) {
