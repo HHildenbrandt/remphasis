@@ -148,8 +148,11 @@ mcEM_step <- function(brts,
                                  num_threads,
                                  return_trees,
                                  verbose)
-    
-    mcem <- rbind(mcem, data.frame(pars = results$estimates,
+    pars <- results$estimates
+    mcem <- rbind(mcem, data.frame(par1 = pars[1],
+                                   par2 = pars[2],
+                                   par3 = pars[3],
+                                   par4 = pars[4],
                                    fhat = results$fhat,
                                    sample_size = sample_size))
     
