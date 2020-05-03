@@ -68,27 +68,6 @@ namespace emphasis {
       if (nullptr != eptr) {
         std::rethrow_exception(eptr);
       }
-      auto w_ = w;
-      {
-        auto it = std::max_element(w_.cbegin(), w_.cend());
-        double fhat = 0.f;
-        double mult = 1.0 / w.size();
-        if (it != w_.cend()) {
-          const auto max_w = *it;
-          for (auto& x : w_) {
-            if (x > 700) { // overflow
-              fhat = detail::huge;
-            }
-            else if (x > -700) {  // underflow if x < -700 --> exp(-700) ~ 0
-              fhat += std::exp(x) * mult;
-            }
-
-            x = std::exp(x - max_w);
-          }
-          fhat = std::log(fhat);
-        }
-        int z = 0;
-      }
       return w;
     }
     
@@ -170,13 +149,13 @@ namespace emphasis {
         ++E.rejected_zero_weights;
       }
       else {
-        fhat += std::exp(log_w[i]);
         E.weights.push_back(w);
         ++it;
       }
+	  fhat += std::exp(log_w[i]);
     }
     if (!E.trees.empty()) {
-      E.fhat = std::log(fhat / static_cast<double>(E.trees.size()));
+      E.fhat = std::log(fhat / static_cast<double>(log_w.size()));
     }
     auto T1 = std::chrono::high_resolution_clock::now();
     E.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
