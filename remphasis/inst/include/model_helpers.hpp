@@ -89,7 +89,7 @@ namespace emphasis {
 
       void operator+=(double val)
       {
-        if ((prod_ > EMPHASIS_LOGSUM_LOWER_TRESHOLD) && (prod_ > EMPHASIS_LOGSUM_UPPER_TRESHOLD)) {
+        if ((prod_ > EMPHASIS_LOGSUM_LOWER_TRESHOLD) && (prod_ < EMPHASIS_LOGSUM_UPPER_TRESHOLD)) {
           prod_ *= val;
         }
         else {

@@ -62,7 +62,8 @@ extern "C" {
   /* optional */
   typedef const char* (*emp_description_func)();
   typedef bool (*emp_is_threadsafe_func)();
-  
+  typedef bool (*emp_has_discrete_speciation_rate_func)();
+
   /* optional per-tree state handling */
   typedef void (*emp_free_state_func)(void**);
   typedef void (*emp_invalidate_state_func)(void**);

@@ -3,17 +3,52 @@
 #include <algorithm>
 #include <stdexcept>
 #include <atomic>
+#include <tuple>
+#include <memory>
 #include "plugin.hpp"
 #include "augment_tree.hpp"
 #include "model_helpers.hpp"
 #include "state_guard.hpp"
+#include "nlopt_obj.hpp"
 
 
 namespace emphasis {
 
   namespace {
 
+
+    class maximize_lambda
+    {
+      using ml_state = std::tuple<void**, const param_t&, const tree_t&, const Model&>;
+
+      static double dx(unsigned int n, const double* x, double*, void* func_data)
+      {
+        auto ml = *reinterpret_cast<ml_state*>(func_data);
+        return std::max(0.0, std::get<3>(ml).speciation_rate_sum(std::get<0>(ml), *x, std::get<1>(ml), std::get<2>(ml)));
+      }
+
+    public:
+      explicit maximize_lambda() : nlopt_(create_nlopt_1()) {}
+
+      double operator()(void** state, double t0, double t1, const param_t& pars, tree_t& tree, const Model& model)
+      {
+        auto x0 = std::min(t0, t1);
+        auto x1 = std::max(t0, t1);
+        nlopt_->set_lower_bounds(x0);
+        nlopt_->set_upper_bounds(x1);
+        nlopt_->set_xtol_rel(0.0001);
+        ml_state mls(state, pars, tree, model);
+        nlopt_->set_max_objective(dx, &mls);
+        return nlopt_->optimize(x0);
+      }
+
+    private:
+      std::unique_ptr<NLopt_1> nlopt_;
+    };
+
+
     auto thread_local reng = detail::make_random_engine_low_entropy<std::default_random_engine>();
+    auto thread_local gml = maximize_lambda();
 
 
     double get_next_bt(const tree_t& tree, double cbt)
@@ -50,6 +85,39 @@ namespace emphasis {
       tree.reserve(5 * tree.size());    // just a guess, should cover most 'normal' cases
       int num_missing_branches = 0;
       const double b = tree.back().brts;
+      state_guard state(&model);
+      state.invalidate_state();
+      auto& ml = gml;
+      while (cbt < b) {
+        double next_bt = get_next_bt(tree, cbt);
+        double lambda_max = ml(state, cbt, next_bt, pars, tree, model);
+        if (lambda_max > max_lambda) throw augmentation_lambda{};
+        double u1 = std::uniform_real_distribution<>()(reng);
+        double next_speciation_time = cbt - std::log(u1) / lambda_max;
+        if (next_speciation_time < next_bt) {
+          double u2 = std::uniform_real_distribution<>()(reng);
+          double pt = std::max(0.0, model.speciation_rate_sum(state, next_speciation_time, pars, tree)) / lambda_max;
+          if (u2 < pt) {
+            double extinction_time = model.extinction_time(state, next_speciation_time, pars, tree);
+            insert_species(next_speciation_time, extinction_time, tree);
+            num_missing_branches++;
+            if (num_missing_branches > max_missing) {
+              throw augmentation_overrun{};
+            }
+            state.invalidate_state();
+          }
+        }
+        cbt = std::min(next_speciation_time, next_bt);
+      }
+    }
+
+
+    void do_augment_tree_old(const param_t& pars, tree_t& tree, const Model& model, int max_missing, double max_lambda)
+    {
+      double cbt = 0;
+      tree.reserve(5 * tree.size());    // just a guess, should cover most 'normal' cases
+      int num_missing_branches = 0;
+      const double b = tree.back().brts;
       double lambda2 = 0.0;
       bool dirty = true;
       state_guard state(&model);
@@ -76,7 +144,6 @@ namespace emphasis {
             dirty = true;   // tree changed
             state.invalidate_state();
           }
-          // else: tree unchanged; cbt <- next_bt; lambda1 <- lambda2
         }
         cbt = std::min(next_speciation_time, next_bt);
       }
@@ -85,19 +152,14 @@ namespace emphasis {
   } // namespace augment
 
 
-  tree_t augment_tree(const param_t& pars, const tree_t& input_tree, Model* model, int max_missing, double max_lambda)
-  {
-    tree_t unpooled(input_tree);
-    do_augment_tree(pars, unpooled, *model, max_missing, max_lambda);
-    return unpooled;
-  }
-
-
   void augment_tree(const param_t& pars, const tree_t& input_tree, Model* model, int max_missing, double max_lambda, tree_t& pooled)
   {
     pooled.resize(input_tree.size());
     std::copy(input_tree.cbegin(), input_tree.cend(), pooled.begin());
-    do_augment_tree(pars, pooled, *model, max_missing, max_lambda);
+    if (model->has_discrete_speciation_rate()) {
+      do_augment_tree_old(pars, pooled, *model, max_missing, max_lambda);
+    }
+    else throw emphasis::emphasis_error("nyi");
   }
 
 

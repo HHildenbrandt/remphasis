@@ -26,6 +26,7 @@ extern "C" {
   
   EMP_EXTERN(const char*) emp_description() { return Description; }
   EMP_EXTERN(bool) emp_is_threadsafe() { return true; }
+  EMP_EXTERN(bool) emp_has_discrete_speciation_rate() { return true; }
   EMP_EXTERN(int) emp_nparams() { return Npars; }
 
 
@@ -38,7 +39,7 @@ extern "C" {
   EMP_EXTERN(double) emp_speciation_rate(void*, double t, const double* pars, unsigned n, const emp_node_t* tree)
   {
     auto it = std::lower_bound(tree, tree + n, t, detail::node_less{});
-    it = std::max(it, tree + n - 1);
+    it = std::min(it, tree + n - 1);
     const double N = it->n;
     const double lambda = std::max<double>(0.0, pars[1] + pars[2] * N);
     return lambda;
@@ -48,7 +49,7 @@ extern "C" {
   EMP_EXTERN(double) emp_speciation_rate_sum(void*, double t, const double* pars, unsigned n, const emp_node_t* tree)
   {
     auto it = std::lower_bound(tree, tree + n, t, detail::node_less{});
-    it = std::max(it, tree + n - 1);
+    it = std::min(it, tree + n - 1);
     const double N = it->n;
     const double lambda = std::max<double>(0.0, pars[1] + pars[2] * N);
     return lambda * N * (1.0 - std::exp(-pars[0] * (tree[n - 1].brts - t)));

@@ -10,41 +10,15 @@
 #include <cmath>  
 #include <algorithm>
 #include <functional>
-#ifdef EMP_BUILD_STANDALONE_CPP
-# include <nlopt.h>
-#else
-# include <nloptrAPI.h>
-#endif
+#include <nlopt.h>
 #include "plugin.hpp"
 #include "emphasis.hpp"
+#include "nlopt_obj.hpp"
 
 
 namespace emphasis {
 
   const int default_nlopt_algo = NLOPT_LN_SBPLX;
-
-
-  M_step_t::M_step_t(M_step_t&& rhs) noexcept
-  {
-    this->operator=(std::move(rhs));
-  }
-
-  
-  M_step_t& M_step_t::operator=(M_step_t&& rhs) noexcept
-  {
-    estimates = rhs.estimates;
-    opt = rhs.opt;
-    minf = rhs.minf;
-    nlopt = rhs.nlopt; rhs.nlopt = nullptr;
-    elapsed = rhs.elapsed;
-    return *this;
-  }
-
-
-  M_step_t::~M_step_t()
-  {
-    if (nlopt) nlopt_destroy(nlopt);
-  }
 
 
   namespace {
@@ -105,19 +79,17 @@ namespace emphasis {
     omp_set_num_threads(num_threads);
     auto T0 = std::chrono::high_resolution_clock::now();
     nlopt_data sd{ model, trees, weights };
-    nlopt_opt opt = nlopt_create(static_cast<nlopt_algorithm>(algo), static_cast<unsigned int>(model->nparams()));
     auto M = M_step_t{};
-    if (opt != nullptr) {
-      M.nlopt = opt;
-      nlopt_set_xtol_rel(opt, xtol);
-      auto lower = lower_bound.empty() ? model->lower_bound() : lower_bound;
-      if (!lower.empty()) nlopt_set_lower_bounds(opt, lower.data());
-      auto upper = upper_bound.empty() ? model->upper_bound() : upper_bound;
-      if (!upper.empty()) nlopt_set_upper_bounds(opt, upper.data());
-      nlopt_set_min_objective(opt, objective, &sd);
-    }
+    auto nlopt = create_nlopt(pars.size());
     M.estimates = pars;
-    M.opt = nlopt_optimize(opt, M.estimates.data(), &M.minf);
+    nlopt->set_xtol_rel(xtol);
+    auto lower = lower_bound.empty() ? model->lower_bound() : lower_bound;
+    if (!lower.empty()) nlopt->set_lower_bounds(lower);
+    auto upper = upper_bound.empty() ? model->upper_bound() : upper_bound;
+    if (!upper.empty()) nlopt->set_upper_bounds(upper);
+    nlopt->set_min_objective(objective, &sd);
+    M.minf = nlopt->optimize(M.estimates);
+    M.opt = nlopt->result();
     auto T1 = std::chrono::high_resolution_clock::now();
     M.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
     return M;

@@ -1,3 +1,4 @@
+#include <cmath>
 #include "plugin.hpp"
 #include "emphasis.hpp"
 #include "model_helpers.hpp"
@@ -20,6 +21,7 @@ namespace emphasis {
       emp_local_load_address(description, true);
       emp_local_load_address(nparams, false);
       emp_local_load_address(is_threadsafe, true);
+      emp_local_load_address(has_discrete_speciation_rate, true);
       emp_local_load_address(free_state, true);
       emp_local_load_address(invalidate_state, true);
       emp_local_load_address(extinction_time, false);
@@ -52,7 +54,12 @@ namespace emphasis {
       return (is_threadsafe_) ? is_threadsafe_() : false; 
     }
     
-    int nparams() const override 
+    bool has_discrete_speciation_rate() const override
+    {
+      return (has_discrete_speciation_rate_) ? has_discrete_speciation_rate_() : false;
+    }
+
+    int nparams() const override
     { 
       return nparams_(); 
     };
@@ -112,6 +119,7 @@ namespace emphasis {
     static emp_loglik_func loglik_;
     static emp_description_func description_;
     static emp_is_threadsafe_func is_threadsafe_;
+    static emp_has_discrete_speciation_rate_func has_discrete_speciation_rate_;
     static emp_nparams_func nparams_;
     static emp_lower_bound_func lower_bound_;
     static emp_upper_bound_func upper_bound_;
@@ -128,6 +136,7 @@ namespace emphasis {
   emp_loglik_func dyn_model_t::loglik_ = nullptr;
   emp_description_func dyn_model_t::description_ = nullptr;
   emp_is_threadsafe_func dyn_model_t::is_threadsafe_ = nullptr;
+  emp_has_discrete_speciation_rate_func dyn_model_t::has_discrete_speciation_rate_ = nullptr;
   emp_nparams_func dyn_model_t::nparams_ = nullptr;
   emp_lower_bound_func dyn_model_t::lower_bound_ = nullptr;
   emp_upper_bound_func dyn_model_t::upper_bound_ = nullptr;

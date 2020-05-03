@@ -1,6 +1,7 @@
-#ifndef EMPHASIS_STATE_GUARD_HPP_INCLUDED
-#define EMPHASIS_STATE_GUARD_HPP_INCLUDED
+#ifndef EMPHASIS_GUARDS_HPP_INCLUDED
+#define EMPHASIS_GUARDS_HPP_INCLUDED
 
+#include <nlopt.h>
 #include "plugin.hpp"
 
 

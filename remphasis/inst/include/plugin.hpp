@@ -38,6 +38,7 @@ namespace emphasis {
     virtual int nparams() const = 0;              // number of parameters
 
     // diversification model, augmentation
+    virtual bool has_discrete_speciation_rate() const { return false; }
     virtual double extinction_time(void** state, double t_speciations, const param_t& pars, const tree_t& tree) const = 0;
     virtual double speciation_rate(void** state, double t, const param_t& pars, const tree_t& tree) const = 0;
     virtual double speciation_rate_sum(void** state, double t, const param_t& pars, const tree_t& tree) const = 0;

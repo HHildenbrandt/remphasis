@@ -59,17 +59,9 @@ namespace emphasis {
   // results from m
   struct M_step_t
   {
-    M_step_t(M_step_t&&) noexcept;
-    M_step_t& operator=(M_step_t&&) noexcept;
-    M_step_t(const M_step_t&) = delete;
-    M_step_t& operator=(const M_step_t&) = delete;
-    M_step_t() {};
-    ~M_step_t();
-
     param_t estimates;
     int opt = -1;                       // nlopt result
     double minf = 0.0;
-    struct nlopt_opt_s* nlopt = nullptr;
     double elapsed = 0.0;               // elapsed runtime [ms]
   };
 

@@ -6,6 +6,7 @@
 #include <mutex>
 #include <atomic>
 #include <algorithm>
+#include <numeric>
 #include "emphasis.hpp"
 #include "augment_tree.hpp"
 #include "plugin.hpp"
@@ -15,7 +16,7 @@
 
 namespace emphasis {
 
-  namespace {
+  namespace detail {
 
     // this little addition reduces the load to memory allocator massively.
     tree_t thread_local pooled_tree;
@@ -43,10 +44,9 @@ namespace emphasis {
     }
 
 
-    std::vector<double> w(param_t pars, 
-                          const std::vector<tree_t>& trees, 
-                          const Model* model,
-                          double& fhat)
+    std::vector<double> log_w(param_t pars, 
+                              const std::vector<tree_t>& trees, 
+                              const Model* model)
     {
       std::vector<double> w(trees.size(), 0.0);
       std::mutex mutex;
@@ -68,21 +68,26 @@ namespace emphasis {
       if (nullptr != eptr) {
         std::rethrow_exception(eptr);
       }
-      auto it = std::max_element(w.cbegin(), w.cend());
-      fhat = 0.f;
-      double mult = 1.0 / w.size();
-      if (it != w.cend()) {
-        const auto max_w = *it;
-        for (auto& x : w) {
-          if(x > 700) { // overflow
-            fhat = detail::huge;
-          } else if(x > -700) {  // underflow if x < -700 --> exp(-700) ~ 0
-            fhat += std::exp(x) * mult;
+      auto w_ = w;
+      {
+        auto it = std::max_element(w_.cbegin(), w_.cend());
+        double fhat = 0.f;
+        double mult = 1.0 / w.size();
+        if (it != w_.cend()) {
+          const auto max_w = *it;
+          for (auto& x : w_) {
+            if (x > 700) { // overflow
+              fhat = detail::huge;
+            }
+            else if (x > -700) {  // underflow if x < -700 --> exp(-700) ~ 0
+              fhat += std::exp(x) * mult;
+            }
+
+            x = std::exp(x - max_w);
           }
-          
-          x = std::exp(x - max_w);
+          fhat = std::log(fhat);
         }
-        fhat = std::log(fhat);
+        int z = 0;
       }
       return w;
     }
@@ -120,7 +125,7 @@ namespace emphasis {
     std::mutex mutex;
     std::atomic<bool> stop{ false };    // non-handled exception
     std::exception_ptr eptr = nullptr;
-    tree_t init_tree = create_tree(brts, static_cast<double>(soc));
+    tree_t init_tree = detail::create_tree(brts, static_cast<double>(soc));
     auto E = E_step_t{};
     auto T0 = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for if(model->is_threadsafe()) schedule(dynamic, 1)
@@ -128,9 +133,9 @@ namespace emphasis {
       try {
         if (!stop) {
           // reuse tree from pool
-          auto& pooled = pooled_tree;
+          auto& pooled = detail::pooled_tree;
           emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pooled);
-          calculate_pd(pooled);
+          detail::calculate_pd(pooled);
           std::lock_guard<std::mutex> _(mutex);
           E.trees.emplace_back(pooled.cbegin(), pooled.cend());
         }
@@ -152,15 +157,26 @@ namespace emphasis {
     if (nullptr != eptr) {
       std::rethrow_exception(eptr);
     }
-    E.weights = w(pars, E.trees, model, E.fhat);
+    auto log_w = detail::log_w(pars, E.trees, model);
+    const double max_log_w = *std::max_element(log_w.cbegin(), log_w.cend());
+    double fhat = 0.0;
     // remove 'impossible' trees
+    // calculate weights and fhat on the fly
     auto it = E.trees.begin();
-    for (size_t i = 0; i < E.weights.size(); ++i) {
-      if (E.weights[i] == 0.0) {
+    for (size_t i = 0; i < log_w.size(); ++i) {
+      const auto w = std::exp(log_w[i] - max_log_w);
+      if (w == 0.0) {
         it = E.trees.erase(it);
         ++E.rejected_zero_weights;
       }
-      else ++it;
+      else {
+        fhat += std::exp(log_w[i]);
+        E.weights.push_back(w);
+        ++it;
+      }
+    }
+    if (!E.trees.empty()) {
+      E.fhat = std::log(fhat / static_cast<double>(E.trees.size()));
     }
     auto T1 = std::chrono::high_resolution_clock::now();
     E.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
