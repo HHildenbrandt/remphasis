@@ -2,7 +2,7 @@
 #ifdef EMP_BUILD_STANDALONE_CPP
 # include <nlopt.h>
 #else
-# include <nloptAPI.h>
+# include <nloptrAPI.h>
 #endif
 #include "emphasis.hpp"
 #include "nlopt_obj.hpp"
@@ -144,7 +144,7 @@ namespace emphasis {
       {
         double fmin = 0.0;
         if (NLOPT_SUCCESS > (result_ = nlopt_optimize(nlopt_, x.data(), &fmin))) {
-          throw emphasis_error("optimize failed");
+          throw emphasis_error("nlopt_optimize failed");
         }
         return fmin;
       }
@@ -161,13 +161,13 @@ namespace emphasis {
 
 
 
-  std::unique_ptr<NLopt_1> emphasis::create_nlopt_1()
+  std::unique_ptr<NLopt_1> create_nlopt_1()
   {
     return std::unique_ptr<NLopt_1>(new linked_nlopt_1());
   }
 
 
-  std::unique_ptr<NLopt> emphasis::create_nlopt(size_t nparams)
+  std::unique_ptr<NLopt> create_nlopt(size_t nparams)
   {
     return std::unique_ptr<NLopt>(new linked_nlopt(nparams));
   }

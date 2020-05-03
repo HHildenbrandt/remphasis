@@ -49,7 +49,6 @@ List rcpp_mcem(const NumericVector& brts_i,
     for (auto p : init_pars) Rcout << p << " ";
     Rcout << "}\n";
   }
-  Rcout << lower_bound.size();
   auto mcem = emphasis::mcem(sample_size,
                              init_pars,
                              brts,
