@@ -152,7 +152,7 @@ namespace emphasis {
         E.weights.push_back(w);
         ++it;
       }
-	  fhat += std::exp(log_w[i]);
+	    fhat += std::exp(log_w[i]);
     }
     if (!E.trees.empty()) {
       E.fhat = std::log(fhat / static_cast<double>(log_w.size()));
