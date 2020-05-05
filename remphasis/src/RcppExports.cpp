@@ -34,7 +34,9 @@ static const R_CallMethodDef CallEntries[] = {
     {NULL, NULL, 0}
 };
 
+void rempahsis_init(DllInfo *dll);
 RcppExport void R_init_remphasis(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
+    rempahsis_init(dll);
 }
