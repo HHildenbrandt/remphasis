@@ -23,7 +23,8 @@ List rcpp_mcem(const NumericVector& brts_i,
                const NumericVector& init_pars_i,      
                int sample_size,                       
                const std::string& plugin,             
-               int soc = 2,                           
+               int soc = 2,
+               bool cont = true,    // approx. max lambda
                int max_misssing = 10000,               
                double max_lambda = 500.0,             
                const NumericVector& lower_bound_i = NumericVector(),  
@@ -46,6 +47,7 @@ List rcpp_mcem(const NumericVector& brts_i,
     Rcout << "thread safe: " << (model->is_threadsafe() ? "true" : "false") << '\n';
     Rcout << "model description:\n" << model->description();
     Rcout << "\nrunning mcE_step with N = " << sample_size;
+    Rcout << "\napprox. max. lambda: " << cont;
     Rcout << "\nInitial parameters: { ";
     for (auto p : init_pars) Rcout << p << " ";
     Rcout << "}\n";
@@ -55,12 +57,12 @@ List rcpp_mcem(const NumericVector& brts_i,
                              brts,
                              model.get(),
                              soc,
+                             cont,
                              max_misssing,
                              max_lambda,
                              lower_bound,
                              upper_bound,
                              xtol,
-                             emphasis::default_nlopt_algo,
                              num_threads);
 
   if(verbose) {

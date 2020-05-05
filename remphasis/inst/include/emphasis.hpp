@@ -10,7 +10,6 @@
 
 namespace emphasis {
 
-  extern const int default_nlopt_algo;  // resolves to NLOPT_SBPLX
   static constexpr int default_max_missing_branches = 10000;
   static constexpr double default_max_aug_lambda = 500.0;
 
@@ -53,7 +52,8 @@ namespace emphasis {
                   int soc = 2,
                   int max_missing = default_max_missing_branches,
                   double max_lambda = default_max_aug_lambda,
-                  int num_threads = 0);
+                  int num_threads = 0,
+                  bool cont = true);
 
 
   // results from m
@@ -73,7 +73,6 @@ namespace emphasis {
                   const param_t& lower_bound = {}, // overrides model.lower_bound
                   const param_t& upper_bound = {}, // overrides model.upper.bound
                   double xtol = 0,
-                  int algo = default_nlopt_algo,
                   int num_threads = 0);
 
 
@@ -97,12 +96,12 @@ namespace emphasis {
               const brts_t& brts,
               class Model* model,
               int soc = 2,
+              bool cont = true,
               int max_missing = default_max_missing_branches,
               double max_lambda = default_max_aug_lambda,
               const param_t& lower_bound = {}, // overrides model.lower_bound
               const param_t& upper_bound = {}, // overrides model.upper.bound
               double xtol = 0,
-              int algo = default_nlopt_algo,
               int num_threads = 0);
 
 

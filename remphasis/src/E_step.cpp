@@ -96,7 +96,8 @@ namespace emphasis {
                   int soc,
                   int max_missing,
                   double max_lambda,
-                  int num_threads)
+                  int num_threads,
+                  bool cont)
   {
     if (num_threads <= 0) num_threads = std::thread::hardware_concurrency();
     num_threads = std::min(num_threads, static_cast<int>(std::thread::hardware_concurrency()));
@@ -113,7 +114,7 @@ namespace emphasis {
         if (!stop) {
           // reuse tree from pool
           auto& pooled = detail::pooled_tree;
-          emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pooled);
+          emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pooled, cont);
           detail::calculate_pd(pooled);
           std::lock_guard<std::mutex> _(mutex);
           E.trees.emplace_back(pooled.cbegin(), pooled.cend());
@@ -152,10 +153,10 @@ namespace emphasis {
         E.weights.push_back(w);
         ++it;
       }
-	    fhat += std::exp(log_w[i]);
+      fhat += std::exp(log_w[i]);
     }
     if (!E.trees.empty()) {
-      E.fhat = std::log(fhat / static_cast<double>(log_w.size()));
+      E.fhat = std::log(fhat / static_cast<double>(E.trees.size()));
     }
     auto T1 = std::chrono::high_resolution_clock::now();
     E.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
