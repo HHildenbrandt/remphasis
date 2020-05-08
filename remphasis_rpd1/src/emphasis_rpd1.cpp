@@ -36,6 +36,16 @@ extern "C" {
   }
 
 
+  EMP_EXTERN(double) emp_nh_rate(void*, double t, const double* pars, unsigned n, const emp_node_t* tree)
+  {
+    auto it = std::lower_bound(tree, tree + n, t, detail::node_less{});
+    it = std::min(it, tree + n - 1);
+    const double N = it->n;
+    const double lambda = std::max<double>(0.0, pars[1] + pars[2] * N);
+    return lambda * N * (1.0 - std::exp(-pars[0] * (tree[n - 1].brts - t)));
+  }
+
+
   EMP_EXTERN(double) emp_speciation_rate(void*, double t, const double* pars, unsigned n, const emp_node_t* tree)
   {
     auto it = std::lower_bound(tree, tree + n, t, detail::node_less{});
@@ -46,34 +56,25 @@ extern "C" {
   }
 
 
-  EMP_EXTERN(double) emp_speciation_rate_sum(void*, double t, const double* pars, unsigned n, const emp_node_t* tree)
-  {
-    auto it = std::lower_bound(tree, tree + n, t, detail::node_less{});
-    it = std::min(it, tree + n - 1);
-    const double N = it->n;
-    const double lambda = std::max<double>(0.0, pars[1] + pars[2] * N);
-    return lambda * N * (1.0 - std::exp(-pars[0] * (tree[n - 1].brts - t)));
-  }
+  /*
+  nh_rate_T <- function(x,model,pars,tree){
+  speciation_rate(tm=x,tree = tree,pars = pars,model = model,soc=tree$n[1],sum_lambda = TRUE)*(1-exp(-(max(tree$brts)-x)*mu))
 
+
+*/
 
   EMP_EXTERN(double) emp_intensity(void*, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    double sum_sigma = 0;
-    const double max_brts = tree[n - 1].brts;
-    const double exp_max_term = std::exp(-pars[0] * max_brts) / pars[0];
-    double exp_brts_m1_term = 1.0;
+    detail::mu_integral muint(pars[0], tree[n - 1].brts);
+    double inte = 0;
     double prev_brts = 0;
     for (unsigned i = 0; i < n; ++i) {
       const auto& node = tree[i];
       const double lambda = std::max(0.0, pars[1] + pars[2] * node.n);
-      const double wt = node.brts - prev_brts;
-      const double exp_brts_term = std::exp(pars[0] * node.brts);
-      const double sigma = node.n * lambda * (wt - exp_max_term * (exp_brts_term - exp_brts_m1_term));
-      sum_sigma += sigma;
-      exp_brts_m1_term = exp_brts_term;
+      inte += node.n * lambda * muint(prev_brts, node.brts);
       prev_brts = node.brts;
     }
-    return sum_sigma;
+    return inte;
   }
 
 
@@ -114,22 +115,25 @@ extern "C" {
 
   EMP_EXTERN(double) emp_loglik(void*, const double* pars, unsigned n, const emp_node_t* tree)
   {
-    double sum_inte = 0;
-    auto sum_rho = detail::log_sum{};
-    auto prev_sum_rho = detail::log_sum{};
-    double prev_brts = 0;
+    detail::log_sum log_sr{};
+    int cex = 0;
+    double inte = 0.0;
+    double prev_brts = 0.0;
     for (unsigned i = 0; i < n; ++i) {
       const auto& node = tree[i];
-      const double wt = node.brts - prev_brts;
-      const double lambda = std::max<double>(0, pars[1] + pars[2] * node.n);
-      sum_inte += node.n * (pars[0] + lambda) * wt;
-      prev_sum_rho = sum_rho;
-      const auto to = detail::is_extinction(node) ? 0.0 : 1.0;
-      sum_rho += lambda * to + pars[0] * (1.0 - to);
+      const double sr = emp_speciation_rate(nullptr, node.brts, pars, n, tree);
+      if (detail::is_extinction(node)) {
+        ++cex;
+      }
+      else {
+        log_sr += sr;
+      }
+      // intensity.numerical2
+      inte += (node.brts - prev_brts) * node.n * (sr + pars[0]);
       prev_brts = node.brts;
     }
-    double log_lik = prev_sum_rho.result() - sum_inte;
-    return log_lik;
+    const double loglik = std::log(pars[0]) * cex + log_sr.result() - inte;
+    return loglik;
   }
 
 

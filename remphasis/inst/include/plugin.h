@@ -71,8 +71,8 @@ extern "C" {
   /* diversification model */
   typedef int (*emp_nparams_func)();
   typedef double (*emp_extinction_time_func)(void**, double, const double*, unsigned, const emp_node_t*);
+  typedef double (*emp_nh_rate_func)(void**, double, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_speciation_rate_func)(void**, double, const double*, unsigned, const emp_node_t*);
-  typedef double (*emp_speciation_rate_sum_func)(void**, double, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_sampling_prob_func)(void**, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_intensity_func)(void**, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_loglik_func)(void**, const double*, unsigned, const emp_node_t*);

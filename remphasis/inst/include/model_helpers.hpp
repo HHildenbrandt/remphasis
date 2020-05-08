@@ -11,11 +11,11 @@
 
 
 #ifndef EMPHASIS_LOGSUM_LOWER_TRESHOLD
-#define EMPHASIS_LOGSUM_LOWER_TRESHOLD 10e-20
+#define EMPHASIS_LOGSUM_LOWER_TRESHOLD 10e-50
 #endif
 
 #ifndef EMPHASIS_LOGSUM_UPPER_TRESHOLD
-#define EMPHASIS_LOGSUM_UPPER_TRESHOLD 10e20
+#define EMPHASIS_LOGSUM_UPPER_TRESHOLD 10e+50
 #endif
 
 
@@ -85,7 +85,15 @@ namespace emphasis {
     class log_sum
     {
     public:
-      double result() const { return std::log(prod_) + sum_; }
+      double result() const 
+      { 
+        double r = std::log(prod_) + sum_;
+        if (!std::isfinite(r)) {
+          const double s = std::signbit(sum_) ? -1.0 : 1.0;
+          r = s * std::numeric_limits<double>::infinity();
+        }
+        return r; 
+      }
 
       void operator+=(double val)
       {
@@ -128,6 +136,44 @@ namespace emphasis {
     {
       return fun(state, t, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
     }
+
+
+    // Int_0_t1 (1-exp(-mu*(tm-t)))
+    class mu_integral
+    {
+    public:
+      mu_integral(double mu, double tm)
+      : mu_(mu),
+        s_(1.0 / (mu * std::exp(mu * tm)))
+      {}
+
+      double operator()(double t0, double t1)
+      {
+        const double expt0 = (pt1_ == t0) ? expt1_ : std::exp(mu_ * t0);
+        expt1_ = std::exp(mu_ * t1);
+        return (t1 - t0) - s_ * (expt1_ - expt0);
+      }
+
+    private:
+      double pt1_ = -1.0;
+      double expt1_ = 0;
+      const double mu_ = 0;
+      const double s_ = 0;
+    };
+
+
+    struct node_types_counter 
+    {
+      void operator+=(const node_t& node)
+      {
+        ext += is_extinction(node);
+        tip += is_tip(node);
+        mis += is_missing(node);
+      }
+      size_t ext = 0; 
+      size_t tip = 0; 
+      size_t mis = 0; 
+    };
 
   }
 

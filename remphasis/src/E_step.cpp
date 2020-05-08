@@ -137,9 +137,9 @@ namespace emphasis {
     if (nullptr != eptr) {
       std::rethrow_exception(eptr);
     }
-    auto log_w = detail::log_w(pars, E.trees, model);
+    const auto log_w = detail::log_w(pars, E.trees, model);
     const double max_log_w = *std::max_element(log_w.cbegin(), log_w.cend());
-    double fhat = 0.0;
+    double sum_w = 0.0;
     // remove 'impossible' trees
     // calculate weights and fhat on the fly
     auto it = E.trees.begin();
@@ -153,11 +153,9 @@ namespace emphasis {
         E.weights.push_back(w);
         ++it;
       }
-      fhat += std::exp(log_w[i]);
+      sum_w += w;
     }
-    if (!E.trees.empty()) {
-      E.fhat = std::log(fhat / static_cast<double>(E.trees.size()));
-    }
+    E.fhat = std::log(sum_w / log_w.size()) + max_log_w;
     auto T1 = std::chrono::high_resolution_clock::now();
     E.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
     return E;

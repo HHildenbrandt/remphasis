@@ -25,8 +25,8 @@ namespace emphasis {
       emp_local_load_address(free_state, true);
       emp_local_load_address(invalidate_state, true);
       emp_local_load_address(extinction_time, false);
+      emp_local_load_address(nh_rate, false);
       emp_local_load_address(speciation_rate, false);
-      emp_local_load_address(speciation_rate_sum, false);
       emp_local_load_address(sampling_prob, false);
       emp_local_load_address(intensity, false);
       emp_local_load_address(loglik, false);
@@ -68,12 +68,12 @@ namespace emphasis {
       return detail::wrap(extinction_time_, state, t_speciation, pars, tree);
     }
 
-    double speciation_rate(void** state, double t, const param_t& pars, const tree_t& tree) const override {
-      return detail::wrap(speciation_rate_, state, t, pars, tree);
+    double nh_rate(void** state, double t, const param_t& pars, const tree_t& tree) const override {
+      return detail::wrap(nh_rate_, state, t, pars, tree);
     }
 
-    double speciation_rate_sum(void** state, double t, const param_t& pars, const tree_t& tree) const override {
-      return detail::wrap(speciation_rate_sum_, state, t, pars, tree);
+    double speciation_rate(void** state, double t, const param_t& pars, const tree_t& tree) const override {
+      return detail::wrap(speciation_rate_, state, t, pars, tree);
     }
 
     double sampling_prob(void** state, const param_t& pars, const tree_t& tree) const override {
@@ -112,8 +112,8 @@ namespace emphasis {
     static emp_free_state_func free_state_;
     static emp_invalidate_state_func invalidate_state_;
     static emp_extinction_time_func extinction_time_;
+    static emp_nh_rate_func nh_rate_;
     static emp_speciation_rate_func speciation_rate_;
-    static emp_speciation_rate_sum_func speciation_rate_sum_;
     static emp_sampling_prob_func sampling_prob_;
     static emp_intensity_func intensity_;
     static emp_loglik_func loglik_;
@@ -129,8 +129,8 @@ namespace emphasis {
   emp_free_state_func dyn_model_t::free_state_ = nullptr;
   emp_invalidate_state_func dyn_model_t::invalidate_state_ = nullptr;
   emp_extinction_time_func dyn_model_t::extinction_time_ = nullptr;
+  emp_nh_rate_func dyn_model_t::nh_rate_ = nullptr;
   emp_speciation_rate_func dyn_model_t::speciation_rate_ = nullptr;
-  emp_speciation_rate_sum_func dyn_model_t::speciation_rate_sum_ = nullptr;
   emp_sampling_prob_func dyn_model_t::sampling_prob_ = nullptr;
   emp_intensity_func dyn_model_t::intensity_ = nullptr;
   emp_loglik_func dyn_model_t::loglik_ = nullptr;

@@ -24,7 +24,7 @@ namespace emphasis {
       static double dx(unsigned int n, const double* x, double*, void* func_data)
       {
         auto ml = *reinterpret_cast<ml_state*>(func_data);
-        return std::max(0.0, std::get<3>(ml).speciation_rate_sum(std::get<0>(ml), *x, std::get<1>(ml), std::get<2>(ml)));
+        return std::max(0.0, std::get<3>(ml).nh_rate(std::get<0>(ml), *x, std::get<1>(ml), std::get<2>(ml)));
       }
 
     public:
@@ -96,7 +96,7 @@ namespace emphasis {
         double next_speciation_time = cbt - std::log(u1) / lambda_max;
         if (next_speciation_time < next_bt) {
           double u2 = std::uniform_real_distribution<>()(reng);
-          double pt = std::max(0.0, model.speciation_rate_sum(state, next_speciation_time, pars, tree)) / lambda_max;
+          double pt = std::max(0.0, model.nh_rate(state, next_speciation_time, pars, tree)) / lambda_max;
           if (u2 < pt) {
             double extinction_time = model.extinction_time(state, next_speciation_time, pars, tree);
             insert_species(next_speciation_time, extinction_time, tree);
@@ -124,8 +124,8 @@ namespace emphasis {
       state.invalidate_state();
       while (cbt < b) {
         double next_bt = get_next_bt(tree, cbt);
-        double lambda1 = (!dirty) ? lambda2 : std::max(0.0, model.speciation_rate_sum(state, cbt, pars, tree));
-        lambda2 = std::max(0.0, model.speciation_rate_sum(state, next_bt, pars, tree));
+        double lambda1 = (!dirty) ? lambda2 : std::max(0.0, model.nh_rate(state, cbt, pars, tree));
+        lambda2 = std::max(0.0, model.nh_rate(state, next_bt, pars, tree));
         double lambda_max = std::max<double>(lambda1, lambda2);
         if (lambda_max > max_lambda) throw augmentation_lambda{};
         double u1 = std::uniform_real_distribution<>()(reng);
@@ -133,7 +133,7 @@ namespace emphasis {
         dirty = false;
         if (next_speciation_time < next_bt) {
           double u2 = std::uniform_real_distribution<>()(reng);
-          double pt = std::max(0.0, model.speciation_rate_sum(state, next_speciation_time, pars, tree)) / lambda_max;
+          double pt = std::max(0.0, model.nh_rate(state, next_speciation_time, pars, tree)) / lambda_max;
           if (u2 < pt) {
             double extinction_time = model.extinction_time(state, next_speciation_time, pars, tree);
             insert_species(next_speciation_time, extinction_time, tree);
