@@ -162,19 +162,6 @@ namespace emphasis {
     };
 
 
-    struct node_types_counter 
-    {
-      void operator+=(const node_t& node)
-      {
-        ext += is_extinction(node);
-        tip += is_tip(node);
-        mis += is_missing(node);
-      }
-      size_t ext = 0; 
-      size_t tip = 0; 
-      size_t mis = 0; 
-    };
-
   }
 
 }

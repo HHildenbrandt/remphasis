@@ -62,7 +62,6 @@ extern "C" {
   /* optional */
   typedef const char* (*emp_description_func)();
   typedef bool (*emp_is_threadsafe_func)();
-  typedef bool (*emp_has_discrete_speciation_rate_func)();
 
   /* optional per-tree state handling */
   typedef void (*emp_free_state_func)(void**);
@@ -72,7 +71,6 @@ extern "C" {
   typedef int (*emp_nparams_func)();
   typedef double (*emp_extinction_time_func)(void**, double, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_nh_rate_func)(void**, double, const double*, unsigned, const emp_node_t*);
-  typedef double (*emp_speciation_rate_func)(void**, double, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_sampling_prob_func)(void**, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_intensity_func)(void**, const double*, unsigned, const emp_node_t*);
   typedef double (*emp_loglik_func)(void**, const double*, unsigned, const emp_node_t*);

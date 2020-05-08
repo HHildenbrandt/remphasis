@@ -47,9 +47,9 @@ namespace emphasis {
     double objective(unsigned int n, const double* x, double*, void* func_data)
     {
       auto psd = reinterpret_cast<nlopt_f_data*>(func_data);
-      double Q = 0.0;
       param_t pars(x, x + n);
-#pragma omp parallel for if(psd->model->is_threadsafe()) schedule(dynamic) reduction(+:Q)
+      double Q = 0.0;
+#pragma omp parallel for if(psd->model->is_threadsafe()) schedule(dynamic) reduction(+: Q)
       for (int i = 0; i < static_cast<int>(psd->trees.size()); ++i) {
         const double loglik = psd->model->loglik(&psd->state[i], pars, psd->trees[i]);
         Q += loglik * psd->w[i];
