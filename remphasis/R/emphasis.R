@@ -2,7 +2,7 @@
 emphasis <- function(brts,
                      soc = 2,
                      model = "remphasisddd",
-                     cont = true,
+                     cont = TRUE,
                      init_par = c(0.05, 0.5, 0.0),
                      lower_bound = numeric(0),
                      upper_bound = numeric(0),
@@ -18,14 +18,14 @@ emphasis <- function(brts,
                      pilot_sample_size = seq(100, 1000, by = 100),
                      burnin_iterations = 20,
                      num_threads = 0) {
-  
+
   msg1 <- paste("Initializing emphasis...")
   msg2 <- paste("Age of the tree: ", max(brts))
   msg3 <- paste("Number of speciations: ", length(brts))
   msg4 <- paste("Diversification model to fit:", model)
   msg5 <- "######################################"
   cat(msg1, msg2, msg3, msg4, msg5, sep = "\n")
-  
+
   cat("Performing Phase 1: burn-in", sep = "\n")
   mc <- mcEM_step(brts = brts,
                   pars = init_par,
@@ -43,16 +43,16 @@ emphasis <- function(brts,
                   verbose = FALSE,
                   tol = em_tol,
                   burnin = burnin_iterations)
-  
+
   M <- mc$mcem
   pars <- c(mean(tail(M$par1, n = nrow(M) / 2)),
             mean(tail(M$par2, n = nrow(M) / 2)),
             mean(tail(M$par3, n = nrow(M) / 2)),
             mean(tail(M$par4, n = nrow(M) / 2)))
-  
+
   cat("\n", msg5, sep = "\n")
   cat("Phase 2: Assesing required MC sampling size \n")
-  
+
   for (s in pilot_sample_size) {
     cat(paste("\n Sampling size: ", as.character(s), "\n"))
     mc <- mcEM_step(brts = brts,
@@ -70,7 +70,7 @@ emphasis <- function(brts,
                     verbose = FALSE,
                     tol = em_tol,
                     burnin = 10)
-    
+
     ta <- tail(mc$mcem, n = nrow(M) / 2)
     pars <- c(mean(ta$par1),
               mean(ta$par2),
@@ -91,6 +91,7 @@ emphasis <- function(brts,
                     pars = pars,
                     sample_size = sample_size,
                     model = model,
+                    cont = cont,
                     soc = soc,
                     max_missing = max_missing,
                     max_lambda = max_lambda,
@@ -102,7 +103,7 @@ emphasis <- function(brts,
                     verbose = FALSE,
                     tol = em_tol,
                     burnin = 2)
-    
+
     M <- rbind(M, mc$mcem)
     n.r_old <- n.r
     j <- j + 1
@@ -111,7 +112,7 @@ emphasis <- function(brts,
     pars <- as.numeric(colMeans(mc$mcem)[1:4])
     sample_size <- n.r
   }
-  
+
   cat(pars)
   return(list(pars = pars, MCEM = M))
 }
@@ -121,6 +122,7 @@ mcEM_step <- function(brts,
                       sample_size = 10000,
                       model = "remphasisddd",
                       soc = 2,
+                      cont = TRUE,
                       max_missing = 10000,
                       max_lambda = 500,
                       lower_bound = numeric(0),
@@ -139,38 +141,45 @@ mcEM_step <- function(brts,
     i <- i + 1
     results <- remphasis::em_cpp(brts,
                                  pars,
-                                 sample_size,                   
-                                 locate_plugin(model),           
-                                 soc,                       
-                                 max_missing,           
-                                 max_lambda,           
+                                 sample_size,              
+                                 locate_plugin(model),
+                                 soc,
+                                 cont,
+                                 max_missing,
+                                 max_lambda,
                                  lower_bound,
                                  upper_bound,
-                                 xtol = 0.001,                   
+                                 xtol = 0.001,          
                                  num_threads,
                                  return_trees,
                                  verbose)
     pars <- results$estimates
+    
+    if (is.nan(results$fhat)) {
+      cat("parameters were: ")
+      cat(pars, "\n")
+      cat("with likelihood: ", results$fhat, "\n")
+      stop("parameter combination causes NAN\n")
+    }
+    
     mcem <- rbind(mcem, data.frame(par1 = pars[1],
                                    par2 = pars[2],
                                    par3 = pars[3],
                                    par4 = pars[4],
                                    fhat = results$fhat,
                                    sample_size = sample_size))
-    
+
     if (verbose) {
       print(paste("(mean of) loglikelihood estimation: ", mean(mcem$fhat)))
     }
-    
+
     times <- c(times, mcem$time)
     time_p_it <- mean(times)
-    
+
     if (i > burnin) {
       mcem_est <- mcem[floor(nrow(mcem) / 2):nrow(mcem), ]
       mcem_est <- mcem_est[is.finite(mcem_est$fhat), ]
-      #  sde0 = sde
       sde <- sd(mcem_est$fhat) / sqrt(nrow(mcem_est))
-      #  mde = mean(mcem_est$fhat)
       msg <- paste("Iteration:", i, " SE of the loglikelihood: ", sde)
       cat("\r", msg)
     } else {
@@ -187,5 +196,5 @@ get_required_sampling_size <- function(M, tol = .05) {
   ab <- coef(hlp)
   f_r <- ab[1] - tol
   n_r <- ceiling(ab[2] / (f_r - ab[1]))
-  return(n_r)
+  return(n_r[[1]])
 }
