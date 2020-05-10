@@ -1,12 +1,8 @@
-#ifdef _OPENMP
-#   include <omp.h>
-#else
-#   define omp_set_num_threads(x) 
-#endif
 #include <mutex>
 #include <atomic>
 #include <algorithm>
 #include <numeric>
+#include <tbb/tbb.h>
 #include "emphasis.hpp"
 #include "augment_tree.hpp"
 #include "plugin.hpp"
@@ -49,25 +45,15 @@ namespace emphasis {
                               const Model* model)
     {
       std::vector<double> w(trees.size(), 0.0);
-      std::mutex mutex;
-      std::exception_ptr eptr = nullptr;
-#pragma omp parallel for if(model->is_threadsafe()) schedule(static, 100)
-      for (int i = 0; i < static_cast<int>(trees.size()); ++i) {
-        try {
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, trees.size()), [&](const tbb::blocked_range<size_t>& r) {
+        for (size_t i = r.begin(); i < r.end(); ++i) {
           state_guard state(model);
           state.invalidate_state();
           const auto logf = model->loglik(state, pars, trees[i]);
           const auto logg = model->sampling_prob(state, pars, trees[i]);
           w[i] = logf - logg;
         }
-        catch (...) {
-          std::lock_guard<std::mutex> _(mutex);
-          eptr = std::current_exception();
-        }
-      }
-      if (nullptr != eptr) {
-        std::rethrow_exception(eptr);
-      }
+      });
       return w;
     }
     
@@ -99,44 +85,34 @@ namespace emphasis {
                   int num_threads,
                   bool cont)
   {
-    if (num_threads <= 0) num_threads = std::thread::hardware_concurrency();
-    num_threads = std::min(num_threads, static_cast<int>(std::thread::hardware_concurrency()));
-    omp_set_num_threads(num_threads);
+    tbb::task_scheduler_init _tbb(num_threads);
     std::mutex mutex;
     std::atomic<bool> stop{ false };    // non-handled exception
-    std::exception_ptr eptr = nullptr;
     tree_t init_tree = detail::create_tree(brts, static_cast<double>(soc));
     auto E = E_step_t{};
     auto T0 = std::chrono::high_resolution_clock::now();
-#pragma omp parallel for if(model->is_threadsafe()) schedule(dynamic, 1)
-    for (int i = 0; i < N; ++i) {
-      try {
-        if (!stop) {
-          // reuse tree from pool
-          auto& pooled = detail::pooled_tree;
-          emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pooled, cont);
-          detail::calculate_pd(pooled);
+    tbb::parallel_for(tbb::blocked_range<unsigned>(0, N, 1), [&](const tbb::blocked_range<unsigned>& r) {
+      for (unsigned i = r.begin(); i < r.end(); ++i) {
+        try {
+          if (!stop) {
+            // reuse tree from pool
+            auto& pooled = detail::pooled_tree;
+            emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pooled, cont);
+            detail::calculate_pd(pooled);
+            std::lock_guard<std::mutex> _(mutex);
+            E.trees.emplace_back(pooled.cbegin(), pooled.cend());
+          }
+        }
+        catch (const augmentation_overrun&) {
           std::lock_guard<std::mutex> _(mutex);
-          E.trees.emplace_back(pooled.cbegin(), pooled.cend());
+          ++E.rejected_overruns;
+        }
+        catch (const augmentation_lambda&) {
+          std::lock_guard<std::mutex> _(mutex);
+          ++E.rejected_lambda;
         }
       }
-      catch (const augmentation_overrun&) {
-        std::lock_guard<std::mutex> _(mutex);
-        ++E.rejected_overruns;
-      }
-      catch (const augmentation_lambda&) {
-        std::lock_guard<std::mutex> _(mutex);
-        ++E.rejected_lambda;
-      }
-      catch (...) {
-        std::lock_guard<std::mutex> _(mutex);
-        eptr = std::current_exception();
-        stop = true;    // catastrophic error; don't know how to handle this...
-      }
-    }
-    if (nullptr != eptr) {
-      std::rethrow_exception(eptr);
-    }
+    });
     const auto log_w = detail::log_w(pars, E.trees, model);
     const double max_log_w = *std::max_element(log_w.cbegin(), log_w.cend());
     double sum_w = 0.0;

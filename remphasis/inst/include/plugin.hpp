@@ -30,20 +30,16 @@ namespace emphasis {
     // optional 
     virtual const char* description() const { return "not set"; }   // textual description of the model
     virtual bool is_threadsafe() const { return false; }            // is this implementation thread-save?
+    virtual int nparams() const = 0;                                // number of parameters
 
     // optional per-tree state handling
     virtual void free_state(void** state) const {}
     virtual void invalidate_state(void** state) const {}
 
-    virtual int nparams() const = 0;              // number of parameters
-
-    // diversification model, augmentation
+    // diversification model
     virtual double extinction_time(void** state, double t_speciations, const param_t& pars, const tree_t& tree) const = 0;
     virtual double nh_rate(void** state, double t, const param_t& pars, const tree_t& tree) const = 0;
     virtual double sampling_prob(void** state, const param_t& pars, const tree_t& tree) const = 0;
-    virtual double intensity(void** state, const param_t& pars, const tree_t& tree) const = 0;
-
-    // diversification model, optimization
     virtual double loglik(void** state, const param_t& pars, const tree_t& tree) const = 0;
 
     // optional hints for optimization step

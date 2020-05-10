@@ -17,6 +17,22 @@ namespace emphasis {
   namespace {
 
 
+    template <typename IT>
+    inline IT make_node(IT it, double t, double n, double t_ext)
+    {
+      it->brts = t; it->n = n; it->t_ext = t_ext; it->pd = 0.0;
+      return it;
+    }
+
+
+    template <typename IT>
+    inline IT make_extinct_node(IT it, double t, double n)
+    {
+      it->brts = t; it->n = n; it->t_ext = t_ext_extinct; it->pd = 0.0;
+      return it;
+    }
+
+
     class maximize_lambda
     {
       using ml_state = std::tuple<void**, const param_t&, const tree_t&, const Model&>;
@@ -47,7 +63,7 @@ namespace emphasis {
     };
 
 
-    auto thread_local reng = detail::make_random_engine_low_entropy<std::default_random_engine>();
+    auto thread_local reng = detail::make_random_engine<std::default_random_engine>();
     maximize_lambda thread_local tlml;
 
 
@@ -70,12 +86,12 @@ namespace emphasis {
       tree.reserve(tree.size() + 2);   // keep iterators valid
       auto first = std::lower_bound(tree.begin(), tree.end(), t_spec, detail::node_less{});
       auto n = (first != tree.begin()) ? n_after(first - 1) : tree.front().n;
-      first = tree.insert(first, detail::make_node(t_spec, n, t_ext));
+      first = make_node(tree.emplace(first), t_spec, n, t_ext);
       // recalculate dirty range
       for (++first; first->brts < t_ext; ++first) {
         first->n = n_after(first - 1);
       }
-      tree.insert(first, detail::make_extinct_node(t_ext, n_after(first - 1)));
+      make_extinct_node(tree.emplace(first), t_ext, n_after(first - 1));
     }
 
 

@@ -8,6 +8,7 @@ Authors@R: c(person("Francisco","Richter", email = "f.richter@rug.nl", role = c(
 Description:  Set of statistical tools for the study of diversification of species and ecological drivers of macro-evolution.
 License: GPL (>= 2)
 Depends: nloptr
-Imports: Rcpp (>= 1.0.1), nloptr
-LinkingTo: Rcpp, nloptr
-SystemRequirements: C++11
+Imports: Rcpp (>= 1.0.1), nloptr, RcppParallel
+LinkingTo: Rcpp, nloptr, RcppParallel
+SystemRequirements: C++11, GNU make
+
