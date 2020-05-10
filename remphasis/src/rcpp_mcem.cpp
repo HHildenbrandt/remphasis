@@ -23,16 +23,16 @@ List rcpp_mcem(const NumericVector& brts_i,
                const NumericVector& init_pars_i,      
                int sample_size,                       
                const std::string& plugin,             
-               int soc = 2,
-               bool cont = true,    // approx. max lambda
-               int max_misssing = 10000,               
-               double max_lambda = 500.0,             
-               const NumericVector& lower_bound_i = NumericVector(),  
-               const NumericVector& upper_bound_i = NumericVector(),  
-               double xtol = 0.001,                     
-               int num_threads = 0,
-               bool copy_trees = false,
-               bool verbose = true) 
+               int soc,
+               bool cont,
+               int max_misssing,               
+               double max_lambda,             
+               const NumericVector& lower_bound_i,  
+               const NumericVector& upper_bound_i,  
+               double xtol,                     
+               int num_threads,
+               bool copy_trees,
+               bool verbose) 
 {
   std::vector<double> brts = Rcpp::as<std::vector<double>>(brts_i);
   std::vector<double> init_pars = Rcpp::as<std::vector<double>>(init_pars_i);
@@ -116,5 +116,5 @@ void rempahsis_init(DllInfo *dll)
   remp_set_lower_bounds1 = (nlopt_result(*)(nlopt_opt, double)) R_GetCCallable("nloptr","nlopt_set_lower_bounds1");
   remp_set_upper_bounds = (nlopt_result(*)(nlopt_opt, const double *)) R_GetCCallable("nloptr","nlopt_set_upper_bounds");
   remp_set_upper_bounds1 = (nlopt_result(*)(nlopt_opt, double)) R_GetCCallable("nloptr","nlopt_set_upper_bounds1");
-  remp_set_xtol_rel = (nlopt_result(*)(nlopt_opt, double)) R_GetCCallable("nloptr","nlopt_set_xtol_abs1");
+  remp_set_xtol_rel = (nlopt_result(*)(nlopt_opt, double)) R_GetCCallable("nloptr","nlopt_set_xtol_rel");
 }
