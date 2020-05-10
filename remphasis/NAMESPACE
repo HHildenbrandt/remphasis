@@ -1,3 +1,4 @@
 useDynLib(remphasis, .registration=TRUE)
 exportPattern("^[[:alpha:]]+")
-importFrom(Rcpp, RcppParallel, RcppParallelLibs, evalCpp)
+importFrom(Rcpp, evalCpp)
+importFrom(RcppParallel,RcppParallelLibs)

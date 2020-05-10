@@ -1,7 +1,7 @@
 ### EMPHASIS functions
 emphasis <- function(brts,
                      soc = 2,
-                     model = "remphasisddd",
+                     model = "remphasisrdp1",
                      cont = true,
                      init_par = c(0.05, 0.5, 0.0),
                      lower_bound = numeric(0),
