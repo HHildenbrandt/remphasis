@@ -85,7 +85,7 @@ namespace emphasis {
                   int num_threads,
                   bool cont)
   {
-    tbb::task_scheduler_init _tbb(num_threads);
+    tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
     std::mutex mutex;
     std::atomic<bool> stop{ false };    // non-handled exception
     tree_t init_tree = detail::create_tree(brts, static_cast<double>(soc));

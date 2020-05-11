@@ -69,7 +69,7 @@ namespace emphasis {
                   double xtol,
                   int num_threads)
   {
-    tbb::task_scheduler_init _tbb(num_threads);
+    tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
     auto T0 = std::chrono::high_resolution_clock::now();
     nlopt_f_data sd{ model, trees, weights };
     auto M = M_step_t{};

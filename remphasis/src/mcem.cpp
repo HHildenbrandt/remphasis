@@ -24,7 +24,6 @@ namespace emphasis {
   {
     auto EM = mcem_t();
     EM.e = E_step(N, pars, brts, model, soc, max_missing, max_lambda, num_threads, true);
-    return EM;
     // optimize
     if (!EM.e.trees.empty()) {
       EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, num_threads);
