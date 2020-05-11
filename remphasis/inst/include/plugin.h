@@ -13,7 +13,7 @@
 # if defined(__GNUC__)
 #   define EMP_STDCALL __attribute__((stdcall))
 # elif defined(_MSC_VER) || defined(_ICC) || defined(_STDCALL_SUPPORTED)
-#   define EMP_CALL __stdcall
+#   define EMP_CALL __cdecl
 # else
 #   define EMP_CALL
 # endif

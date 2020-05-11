@@ -39,7 +39,7 @@ brts_Bucconidae = c(
 )
 pars = c(0.0665968, 0.262529, -0.00564776)
 so = locate_plugin("remphasisrpd1")
-em <- em_cpp(brts_Bucconidae, pars, 100, so, 2, 10000, 500, vector(), vector(), 0.0001, 0, FALSE)
+em <- em_cpp(brts_Bucconidae, pars, 100, so, 2, 10000, 500, vector(), vector(), 0.0001, 10, FALSE)
 
 
 
