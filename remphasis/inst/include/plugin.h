@@ -13,7 +13,7 @@
 # if defined(__GNUC__)
 #   define EMP_STDCALL __attribute__((stdcall))
 # elif defined(_MSC_VER) || defined(_ICC) || defined(_STDCALL_SUPPORTED)
-#   define EMP_CALL __cdecl
+#   define EMP_CALL
 # else
 #   define EMP_CALL
 # endif
@@ -22,9 +22,9 @@
 #endif
 
 #if (defined(_WIN32) || defined(__WIN32__)) && !defined(__LCC__)
-# define EMP_EXTERN(T) extern "C" __declspec(dllexport) T EMP_CALL
+# define EMP_EXTERN(T) extern "C" T
 #else
-# define EMP_EXTERN(T) extern "C" T EMP_CALL
+# define EMP_EXTERN(T) extern "C" T
 #endif
 
 
