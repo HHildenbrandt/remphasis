@@ -96,7 +96,6 @@ namespace emphasis {
               const brts_t& brts,
               class Model* model,
               int soc = 2,
-              bool cont = true,
               int max_missing = default_max_missing_branches,
               double max_lambda = default_max_aug_lambda,
               const param_t& lower_bound = {}, // overrides model.lower_bound

@@ -1,10 +1,3 @@
-#ifdef _OPENMP
-#   include <omp.h>
-#else
-#   define omp_get_max_threads() 1
-#   define omp_get_num_threads() 1
-#   define omp_set_num_threads(x) 
-#endif
 #include <mutex>
 #include <atomic>
 #include <algorithm>
@@ -22,7 +15,6 @@ namespace emphasis {
               const brts_t& brts,
               class Model* model,
               int soc,
-              bool cont,
               int max_missing,
               double max_lambda,
               const param_t& lower_bound, // overrides model.lower_bound
@@ -31,7 +23,8 @@ namespace emphasis {
               int num_threads)
   {
     auto EM = mcem_t();
-    EM.e = E_step(N, pars, brts, model, soc, max_missing, max_lambda, num_threads, cont);
+    EM.e = E_step(N, pars, brts, model, soc, max_missing, max_lambda, num_threads, true);
+    return EM;
     // optimize
     if (!EM.e.trees.empty()) {
       EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, num_threads);
