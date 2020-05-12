@@ -51,14 +51,17 @@ EMP_EXTERN(double) emp_sampling_prob(void**, const double* pars, unsigned n, con
   double logg = 0;
   double prev_brts = 0;
   double tips = tree[0].n;
+  double Ne = 0.0;
   for (unsigned i = 0; i < n; ++i) {
     const auto& node = tree[i];
     const double lambda = speciation_rate(pars, node);
     inte += node.n * lambda * muint(prev_brts, node.brts);
     tips += is_tip(node);
+    Ne -= is_extinction(node);
     if (is_missing(node)) {
+      Ne += 1;
       const double lifespann = node.t_ext - node.brts;
-      logg += std::log(node.n * pars[0] * lambda) - pars[0] * lifespann - std::log(node.n + tips);
+      logg += std::log(node.n * pars[0] * lambda) - pars[0] * lifespann - std::log(2.0 * tips + Ne);
     }
     prev_brts = node.brts;
   }
