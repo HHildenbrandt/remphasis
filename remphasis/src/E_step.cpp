@@ -125,7 +125,7 @@ namespace emphasis {
       const double w = std::exp(E.weights[i] - max_log_w);
       sum_w += (E.weights[i] = w);
     }
-    E.fhat = std::log(sum_w / E.weights.size()) + max_log_w;
+    E.fhat = std::log(sum_w / (E.weights.size() + E.rejected)) + max_log_w;
     E.rejected = E.rejected_lambda + E.rejected_overruns + E.rejected_zero_weights;
     auto T1 = std::chrono::high_resolution_clock::now();
     E.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
