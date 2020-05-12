@@ -66,16 +66,17 @@ namespace emphasis {
                   class Model* model,
                   const param_t& lower_bound, // overrides model.lower_bound
                   const param_t& upper_bound, // overrides model.upper.bound
-                  double xtol,
+                  double xtol_rel,
                   int num_threads)
   {
+    if (!model->is_threadsafe()) num_threads = 1;
     tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
     auto T0 = std::chrono::high_resolution_clock::now();
     nlopt_f_data sd{ model, trees, weights };
     auto M = M_step_t{};
     sbplx nlopt(pars.size());
     M.estimates = pars;
-    nlopt.set_xtol_rel(xtol);
+    nlopt.set_xtol_rel(xtol_rel);
     auto lower = lower_bound.empty() ? model->lower_bound() : lower_bound;
     if (!lower.empty()) nlopt.set_lower_bounds(lower);
     auto upper = upper_bound.empty() ? model->upper_bound() : upper_bound;
@@ -89,4 +90,3 @@ namespace emphasis {
   }
 
 }
-

@@ -1,5 +1,28 @@
+/* Copyright (c) 2007-2014 Massachusetts Institute of Technology
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 /***********************************************************/
 /* C-API for plug-in diversification models                */
+/* Hanno 2020                                              */
 /***********************************************************/
 
 
@@ -9,20 +32,12 @@
 #include <stddef.h>
 
 
-#if (defined(_WIN32) || defined(__WIN32__))
-# if defined(__GNUC__)
-#   define EMP_STDCALL __attribute__((stdcall))
-# elif defined(_MSC_VER) || defined(_ICC) || defined(_STDCALL_SUPPORTED)
-#   define EMP_CALL
-# else
-#   define EMP_CALL
-# endif
-#else
-# define EMP_CALL
-#endif
-
 #if (defined(_WIN32) || defined(__WIN32__)) && !defined(__LCC__)
-# define EMP_EXTERN(T) extern "C" T
+# ifdef EMP_BUILD_STANDALONE_CPP
+#   define EMP_EXTERN(T) extern "C" __declspec(dllexport) T
+# else
+#   define EMP_EXTERN(T) extern "C" T
+# endif
 #else
 # define EMP_EXTERN(T) extern "C" T
 #endif

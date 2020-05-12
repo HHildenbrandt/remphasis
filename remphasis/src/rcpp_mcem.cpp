@@ -21,7 +21,8 @@ DataFrame unpack(const emphasis::tree_t& tree)
 // [[Rcpp::export(name = "em_cpp")]]
 List rcpp_mcem(const std::vector<double>& brts,       
                const std::vector<double>& init_pars,      
-               int sample_size,                       
+               int sample_size,
+			   int maxN,
                const std::string& plugin,             
                int soc,
                int max_misssing,               
@@ -35,6 +36,7 @@ List rcpp_mcem(const std::vector<double>& brts,
   try {
     auto model = emphasis::create_plugin_model(plugin);
     auto mcem = emphasis::mcem(sample_size,
+	                           maxN,
                                init_pars,
                                brts,
                                model.get(),
@@ -56,6 +58,10 @@ List rcpp_mcem(const std::vector<double>& brts,
       }
       ret["trees"] = trees;
     }
+	ret["rejected"] = mcem.e.rejected;
+	ret["rejected_overruns"] = mcem.e.rejected_overruns;
+	ret["rejected_lambda"] = mcem.e.rejected_lambda;
+	ret["rejected_zero_weights"] = mcem.e.rejected_zero_weights;
     ret["estimates"] = NumericVector(mcem.m.estimates.begin(), mcem.m.estimates.end());
     ret["nlopt"] = mcem.m.opt;
     ret["fhat"]  = mcem.e.fhat;

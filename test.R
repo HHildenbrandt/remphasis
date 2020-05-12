@@ -1,5 +1,6 @@
 library(remphasis)
 library(remphasisrpd1)
+library(remphasisrpd5c)
 
 brts_Bucconidae = c(
   35.651906989,
@@ -37,12 +38,9 @@ brts_Bucconidae = c(
   1.4583897125,
   0.698077224199999
 )
-pars = c(0.0665968, 0.262529, -0.00564776)
+pars = c(0.0665968, 0.262529, -0.00564776, 0)
+sample_size=10000
+so = locate_plugin("remphasisrpd5c")
 
-so = locate_plugin("remphasisrpd1")
-em <- em_cpp(brts_Bucconidae, pars, 100, so, 2, 10000, 500, vector(), vector(), 0.001, 12, FALSE)
+em <- em_cpp(brts_Bucconidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 12, FALSE)
 show(em)
-
-
-
-

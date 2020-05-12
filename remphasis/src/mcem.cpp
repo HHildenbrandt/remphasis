@@ -10,7 +10,8 @@
 
 namespace emphasis {
 
-  mcem_t mcem(int N,      // number of augmented trees
+  mcem_t mcem(int N,      // sample size
+              int maxN,   // max. number augmented trees (incl. invalid)
               const param_t& pars,
               const brts_t& brts,
               class Model* model,
@@ -23,7 +24,7 @@ namespace emphasis {
               int num_threads)
   {
     auto EM = mcem_t();
-    EM.e = E_step(N, pars, brts, model, soc, max_missing, max_lambda, num_threads, true);
+    EM.e = E_step(N, maxN, pars, brts, model, soc, max_missing, max_lambda, num_threads, true);
     // optimize
     if (!EM.e.trees.empty()) {
       EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, num_threads);
