@@ -1,3 +1,28 @@
+/* Copyright (c) 2007-2014 Massachusetts Institute of Technology
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+// some model utilities
+// Hanno 2020
+
 #ifndef EMPHASIS_MODEL_HELPRES_HPP_INCLUDED
 #define EMPHASIS_MODEL_HELPRES_HPP_INCLUDED
 
@@ -11,11 +36,11 @@
 
 
 #ifndef EMPHASIS_LOGSUM_LOWER_TRESHOLD
-#define EMPHASIS_LOGSUM_LOWER_TRESHOLD 10e-50
+#define EMPHASIS_LOGSUM_LOWER_TRESHOLD 10e-40
 #endif
 
 #ifndef EMPHASIS_LOGSUM_UPPER_TRESHOLD
-#define EMPHASIS_LOGSUM_UPPER_TRESHOLD 10e+50
+#define EMPHASIS_LOGSUM_UPPER_TRESHOLD 10e+40
 #endif
 
 
@@ -24,6 +49,7 @@ namespace emphasis {
   namespace detail {
 
     static constexpr double huge = std::numeric_limits<double>::max();
+
 
     // returns low-entropy 512 bit array for seed sequence
     // based on std::chrono::high_resolution_clock.
@@ -45,11 +71,11 @@ namespace emphasis {
 
 
     // random number generator from low-entropy seed sequence
-    // ripped from randutils
+    // ripped from rndutils
     template <typename URNG>
-    inline auto make_random_engine_low_entropy() -> URNG
+    inline auto make_random_engine() -> URNG
     {
-      auto seed_array = detail::make_low_entropy_seed_array();
+      auto seed_array = make_low_entropy_seed_array();
       std::seed_seq sseq(seed_array.cbegin(), seed_array.cend());
       return URNG(sseq);
     }
@@ -58,20 +84,6 @@ namespace emphasis {
     inline bool is_extinction(const node_t& node) { return node.t_ext == t_ext_extinct; }
     inline bool is_tip(const node_t& node) { return node.t_ext == t_ext_tip; }
     inline bool is_missing(const node_t& node) { return !(is_extinction(node) || is_tip(node)); }
-
-
-    inline node_t make_node(double t, double n, double t_ext)
-    {
-      node_t tmp; tmp.brts = t; tmp.n = n; tmp.t_ext = t_ext; tmp.pd = 0.0;
-      return tmp;
-    }
-
-
-    inline node_t make_extinct_node(double t, double n)
-    { 
-      node_t tmp; tmp.brts = t; tmp.n = n; tmp.t_ext = t_ext_extinct; tmp.pd = 0.0;
-      return tmp;
-    }
 
 
     struct node_less
@@ -124,20 +136,6 @@ namespace emphasis {
     }
 
 
-    template <typename Fun>
-    inline double wrap(Fun&& fun, void** state, const param_t& pars, const tree_t& tree)
-    {
-      return fun(state, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
-    }
-
-
-    template <typename Fun>
-    inline double wrap(Fun&& fun, void** state, double t, const param_t& pars, const tree_t& tree)
-    {
-      return fun(state, t, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
-    }
-
-
     // Int_0_t1 (1-exp(-mu*(tm-t)))
     class mu_integral
     {
@@ -160,7 +158,6 @@ namespace emphasis {
       const double mu_ = 0;
       const double s_ = 0;
     };
-
 
   }
 

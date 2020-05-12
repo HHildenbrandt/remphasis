@@ -1,3 +1,28 @@
+/* Copyright (c) 2007-2014 Massachusetts Institute of Technology
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+// public C++ API
+// Hanno 2020
+
 #ifndef EMPHASIS_EMPHASIS_HPP_INCLUDED
 #define EMPHASIS_EMPHASIS_HPP_INCLUDED
 
@@ -41,19 +66,20 @@ namespace emphasis {
     int rejected_overruns = 0;          // # trees rejected because overrun of missing branches
     int rejected_lambda = 0;            // # trees rejected because of lambda overrun
     int rejected_zero_weights = 0;      // # trees rejected because of zero-weight
+    int rejected = 0;
     double elapsed = 0;                 // elapsed runtime [ms]
   };
 
 
-  E_step_t E_step(int N,      // number of augmented trees
+  E_step_t E_step(int N,      // sample size
+                  int maxN,   // max number of augmented trees (incl. invalid)
                   const param_t& pars,
                   const brts_t& brts,
                   class Model* model,
                   int soc = 2,
                   int max_missing = default_max_missing_branches,
                   double max_lambda = default_max_aug_lambda,
-                  int num_threads = 0,
-                  bool cont = true);
+                  int num_threads = 0);
 
 
   // results from m
@@ -72,7 +98,7 @@ namespace emphasis {
                   class Model* model,
                   const param_t& lower_bound = {}, // overrides model.lower_bound
                   const param_t& upper_bound = {}, // overrides model.upper.bound
-                  double xtol = 0,
+                  double xtol_rel = 0.001,
                   int num_threads = 0);
 
 
@@ -91,17 +117,17 @@ namespace emphasis {
   };
 
 
-  mcem_t mcem(int N,      // number of augmented trees
+  mcem_t mcem(int N,      // sample size
+              int maxN,   // max. number of augmented trees (incl. invalid)
               const param_t& pars,
               const brts_t& brts,
               class Model* model,
               int soc = 2,
-              bool cont = true,
               int max_missing = default_max_missing_branches,
               double max_lambda = default_max_aug_lambda,
               const param_t& lower_bound = {}, // overrides model.lower_bound
               const param_t& upper_bound = {}, // overrides model.upper.bound
-              double xtol = 0,
+              double xtol_rel = 0.001,
               int num_threads = 0);
 
 

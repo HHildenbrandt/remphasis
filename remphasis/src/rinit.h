@@ -1,15 +1,13 @@
-#ifndef EMPHASIS_RINIT_HPP_INCLUDED
-#define EMPHASIS_RINIT_HPP_INCLUDED
+#ifndef EMPHASIS_RINIT_H_INCLUDED
+#define EMPHASIS_RINIT_H_INCLUDED
 
 #include <nlopt.h>
 
 
-#ifndef EMP_BUILD_STANDALONE
-# if (defined(_WIN32) || defined(__WIN32__)) && !defined(__LCC__)
-#    define REMP_EXPORT extern __declspec(dllimport)
-# else
-#  define REMP_EXPORT extern
-# endif
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(__LCC__)
+#  define REMP_EXPORT extern "C" __declspec(dllexport)
+#else
+#  define REMP_EXPORT extern "C"
 #endif
 
 
@@ -31,9 +29,9 @@ REMP_EXPORT nlopt_result(*remp_set_lower_bounds1)(nlopt_opt, double);
 REMP_EXPORT nlopt_result(*remp_set_upper_bounds)(nlopt_opt, const double *);
 REMP_EXPORT nlopt_result(*remp_set_upper_bounds1)(nlopt_opt, double);
 REMP_EXPORT nlopt_result(*remp_set_xtol_rel)(nlopt_opt, double);
+REMP_EXPORT nlopt_result(*remp_set_xtol_abs)(nlopt_opt, double);
 
-  
-  
+
 #ifdef __cplusplus
 }
 #endif

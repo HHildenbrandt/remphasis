@@ -9,5 +9,5 @@ Description: One paragraph description of what the package does as one or more f
           sentences.
 License: GPL (>= 2)
 Depends: remphasis
-Imports: Rcpp (>= 1.0.4), remphasis
-LinkingTo: Rcpp, remphasis
+Imports: remphasis
+LinkingTo: remphasis

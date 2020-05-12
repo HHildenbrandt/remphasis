@@ -1,5 +1,28 @@
+/* Copyright (c) 2007-2014 Massachusetts Institute of Technology
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 //
 // C++-API for plug-in diversification model
+// Hanno 2020
 //
 
 #ifndef EMPHASIS_PLUGIN_HPP_INCLUDED
@@ -30,20 +53,17 @@ namespace emphasis {
     // optional 
     virtual const char* description() const { return "not set"; }   // textual description of the model
     virtual bool is_threadsafe() const { return false; }            // is this implementation thread-save?
+    virtual bool numerical_max_lambda() const { return true; }
+    virtual int nparams() const = 0;                                // number of parameters
 
     // optional per-tree state handling
     virtual void free_state(void** state) const {}
     virtual void invalidate_state(void** state) const {}
 
-    virtual int nparams() const = 0;              // number of parameters
-
-    // diversification model, augmentation
+    // diversification model
     virtual double extinction_time(void** state, double t_speciations, const param_t& pars, const tree_t& tree) const = 0;
     virtual double nh_rate(void** state, double t, const param_t& pars, const tree_t& tree) const = 0;
     virtual double sampling_prob(void** state, const param_t& pars, const tree_t& tree) const = 0;
-    virtual double intensity(void** state, const param_t& pars, const tree_t& tree) const = 0;
-
-    // diversification model, optimization
     virtual double loglik(void** state, const param_t& pars, const tree_t& tree) const = 0;
 
     // optional hints for optimization step
