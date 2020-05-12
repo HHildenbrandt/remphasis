@@ -22,21 +22,21 @@ DataFrame unpack(const emphasis::tree_t& tree)
 List rcpp_mcem(const std::vector<double>& brts,       
                const std::vector<double>& init_pars,      
                int sample_size,
-			   int maxN,
+			         int maxN,
                const std::string& plugin,             
                int soc,
                int max_misssing,               
                double max_lambda,             
                const std::vector<double>& lower_bound,  
                const std::vector<double>& upper_bound,  
-               double xtol,                     
+               double xtol_rel,                     
                int num_threads,
                bool copy_trees) 
 {
   try {
     auto model = emphasis::create_plugin_model(plugin);
     auto mcem = emphasis::mcem(sample_size,
-	                           maxN,
+	                             maxN,
                                init_pars,
                                brts,
                                model.get(),
@@ -45,7 +45,7 @@ List rcpp_mcem(const std::vector<double>& brts,
                                max_lambda,
                                lower_bound,
                                upper_bound,
-                               xtol,
+                               xtol_rel,
                                num_threads);
     if (mcem.e.trees.empty()) {
       throw std::runtime_error("no trees, no optimization");

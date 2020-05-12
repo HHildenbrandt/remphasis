@@ -2,7 +2,7 @@
 emphasis <- function(brts,
                      init_par,
                      soc = 2,
-                     model = "remphasisrpd1",
+                     model,
                      lower_bound = numeric(0),
                      upper_bound = numeric(0),
                      max_lambda = 500,
@@ -114,6 +114,7 @@ emphasis <- function(brts,
   return(list(pars = pars, MCEM = M))
 }
 
+
 mcEM_step <- function(brts,
                       pars,
                       sample_size,
@@ -137,17 +138,17 @@ mcEM_step <- function(brts,
     i <- i + 1
     results <- remphasis::em_cpp(brts,
                                  pars,
-                                 sample_size,                   
+                                 sample_size,
+                                 maxN = 10 * sample_size,                   
                                  locate_plugin(model),           
                                  soc,
                                  max_missing,           
                                  max_lambda,           
                                  lower_bound,
                                  upper_bound,
-                                 xtol,                   
+                                 xtol_rel = xtol,                   
                                  num_threads,
-                                 return_trees,
-                                 verbose)
+                                 return_trees)
     pars <- results$estimates
     mcem <- rbind(mcem, data.frame(par1 = pars[1],
                                    par2 = pars[2],

@@ -33,5 +33,5 @@ cat('model: rpd5c ', so, '\n')
 cat('sample size: ', sample_size, '\n')
 cat('initial pars:', pars, '\n')
 
-em <- em_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 12, FALSE)
+em <- em_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 0, FALSE)
 show(em)
