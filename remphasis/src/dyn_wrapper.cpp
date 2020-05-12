@@ -38,6 +38,7 @@ namespace emphasis {
     {
       emp_local_load_address(description, true);
       emp_local_load_address(is_threadsafe, true);
+      emp_local_load_address(numerical_max_lambda, true);
       emp_local_load_address(nparams, false);
       emp_local_load_address(free_state, true);
       emp_local_load_address(invalidate_state, true);
@@ -64,11 +65,16 @@ namespace emphasis {
       return (description_) ? description_() : "not set"; 
     }
     
-    bool is_threadsafe() const override 
-    { 
-      return (is_threadsafe_) ? is_threadsafe_() : false; 
+    bool is_threadsafe() const override
+    {
+      return (is_threadsafe_) ? is_threadsafe_() : false;
     }
-    
+
+    bool numerical_max_lambda() const override
+    {
+      return (numerical_max_lambda_) ? numerical_max_lambda_() : true;
+    }
+
     int nparams() const override
     { 
       return nparams_(); 
@@ -113,6 +119,7 @@ namespace emphasis {
   private:
     static emp_description_func description_;
     static emp_is_threadsafe_func is_threadsafe_;
+    static emp_numerical_max_lambda_func numerical_max_lambda_;
     static emp_nparams_func nparams_;
     static emp_free_state_func free_state_;
     static emp_invalidate_state_func invalidate_state_;
@@ -127,6 +134,7 @@ namespace emphasis {
 
   emp_description_func dyn_model_t::description_ = nullptr;
   emp_is_threadsafe_func dyn_model_t::is_threadsafe_ = nullptr;
+  emp_numerical_max_lambda_func dyn_model_t::numerical_max_lambda_ = nullptr;
   emp_nparams_func dyn_model_t::nparams_ = nullptr;
   emp_free_state_func dyn_model_t::free_state_ = nullptr;
   emp_invalidate_state_func dyn_model_t::invalidate_state_ = nullptr;

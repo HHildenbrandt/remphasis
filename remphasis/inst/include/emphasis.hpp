@@ -79,8 +79,7 @@ namespace emphasis {
                   int soc = 2,
                   int max_missing = default_max_missing_branches,
                   double max_lambda = default_max_aug_lambda,
-                  int num_threads = 0,
-                  bool cont = true);
+                  int num_threads = 0);
 
 
   // results from m

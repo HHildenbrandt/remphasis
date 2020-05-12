@@ -27,8 +27,7 @@ namespace emphasis {
                     class Model* model,
                     int max_missing,
                     double max_lambda,
-                    tree_t& out,
-                    bool cont = true);
+                    tree_t& out);
 
 }
 

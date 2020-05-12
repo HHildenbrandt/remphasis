@@ -53,6 +53,7 @@ namespace emphasis {
     // optional 
     virtual const char* description() const { return "not set"; }   // textual description of the model
     virtual bool is_threadsafe() const { return false; }            // is this implementation thread-save?
+    virtual bool numerical_max_lambda() const { return true; }
     virtual int nparams() const = 0;                                // number of parameters
 
     // optional per-tree state handling

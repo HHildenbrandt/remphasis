@@ -65,8 +65,7 @@ namespace emphasis {
                   int soc,
                   int max_missing,
                   double max_lambda,
-                  int num_threads,
-                  bool cont)
+                  int num_threads)
   {
     if (!model->is_threadsafe()) num_threads = 1;
     tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
@@ -81,7 +80,7 @@ namespace emphasis {
           if (!stop) {
             // reuse tree from pool
             auto& pool_tree = detail::pooled_tree;
-            emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pool_tree, cont);
+            emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pool_tree);
             double log_w = 0.0;
             {
               state_guard state(model);

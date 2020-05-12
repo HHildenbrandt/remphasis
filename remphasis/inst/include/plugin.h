@@ -59,6 +59,7 @@ struct emp_node_t
 
 typedef const char* (*emp_description_func)();
 typedef bool (*emp_is_threadsafe_func)();
+typedef bool (*emp_numerical_max_lambda_func)();
 typedef int (*emp_nparams_func)();
 
 

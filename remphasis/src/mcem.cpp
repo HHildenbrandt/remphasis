@@ -24,7 +24,7 @@ namespace emphasis {
               int num_threads)
   {
     auto EM = mcem_t();
-    EM.e = E_step(N, maxN, pars, brts, model, soc, max_missing, max_lambda, num_threads, true);
+    EM.e = E_step(N, maxN, pars, brts, model, soc, max_missing, max_lambda, num_threads);
     // optimize
     if (!EM.e.trees.empty()) {
       EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, num_threads);
