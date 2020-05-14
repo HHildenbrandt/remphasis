@@ -69,8 +69,6 @@ List rcpp_mcem(const std::vector<double>& brts,
     ret["time"]  = mcem.e.elapsed + mcem.m.elapsed;
 
     ret["weights"] = mcem.e.weights;
-    ret["logg"] = mcem.e.logg;    
-    ret["logf"] = mcem.e.logf;    
     return ret;
   }
   catch (const std::exception &err) {
