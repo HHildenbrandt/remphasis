@@ -24,12 +24,12 @@ brts_Megapodiidae = c(
 	1.836070379,
 	1.262732134
 )
-pars = c(0.102054, 0.834852, -0.0361973, 0)
-sample_size=10000
-so = locate_plugin("remphasisrpd5c")
+pars = c(0.102054, 0.834852, -0.0361973)
+sample_size = 100
+so = locate_plugin("remphasisrpd1")
 
 cat('clade: Megapodiidae\n')
-cat('model: rpd5c ', so, '\n')
+cat('model: rpd1 ', so, '\n')
 cat('sample size: ', sample_size, '\n')
 cat('initial pars:', pars, '\n')
 

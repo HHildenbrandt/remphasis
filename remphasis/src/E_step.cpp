@@ -66,11 +66,13 @@ namespace emphasis {
             auto& pool_tree = detail::pooled_tree;
             emphasis::augment_tree(pars, init_tree, model, max_missing, max_lambda, pool_tree);
             double log_w = 0.0;
+            double logg = 0.0;
+            double logf = 0.0;
             {
               state_guard state(model);
               state.invalidate_state();
-              const auto logf = model->loglik(state, pars, pool_tree);
-              const auto logg = model->sampling_prob(state, pars, pool_tree);
+              logf = model->loglik(state, pars, pool_tree);
+              logg = model->sampling_prob(state, pars, pool_tree);
               log_w = logf - logg;
             }
             if (std::isfinite(log_w) && (0.0 < std::exp(log_w))) {
@@ -78,6 +80,8 @@ namespace emphasis {
               if (!stop) {
                 E.trees.emplace_back(pool_tree.cbegin(), pool_tree.cend());
                 E.weights.push_back(log_w);
+                E.logg.push_back(logg);
+                E.logf.push_back(logf);
                 if (static_cast<int>(E.trees.size()) == N) {
                   stop = true;
                 }

@@ -4,6 +4,6 @@
 # attemps to installs remphasis source packages it can find
 # Hanno 2020
 
-for i in $(ls remphasis*.gz); do 
-    R CMD INSTALL --preclean --no-multiarch --with-keep.source ${i%%/}; 
+for i in $(ls remphasis*.gz); do
+    Rscript -e "install.packages('${i}', repos = NULL)"
 done
