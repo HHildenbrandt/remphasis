@@ -60,9 +60,9 @@ EMP_EXTERN(double) emp_sampling_prob(void**, const double* pars, unsigned n, con
     tips += is_tip(node);
     Ne -= is_extinction(node);
     if (is_missing(node)) {
-      Ne += 1;
       const double lifespann = node.t_ext - node.brts;
       logg += std::log(node.n * pars[0] * lambda) - pars[0] * lifespann - std::log(2.0 * tips + Ne);
+      Ne += 1;
     }
     prev_brts = node.brts;
   }
@@ -82,7 +82,7 @@ EMP_EXTERN(double) emp_loglik(void**, const double* pars, unsigned n, const emp_
     if (is_extinction(node)) {
       ++cex;
     }
-    else {
+    else if (i != n-1) {
       log_sr += sr;
     }
     inte += (node.brts - prev_brts) * node.n * (sr + pars[0]);

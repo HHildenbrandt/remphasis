@@ -1,4 +1,3 @@
-#include <cassert>
 #include <memory>
 #include <limits>
 #include <algorithm>
@@ -19,8 +18,8 @@ namespace {
 
 inline double speciation_rate(const double* pars, const emp_node_t& node)
 {
-  const double lambda = std::max<double>(0.0, pars[1] + pars[2] * node.n);
-  return lambda;
+  const double lambda = pars[1] + pars[2] * node.n;
+  return std::max(0.0, lambda);
 }
 
 
@@ -40,9 +39,8 @@ EMP_EXTERN(double) emp_nh_rate(void**, double t, const double* pars, unsigned n,
 {
   auto it = std::lower_bound(tree, tree + n, t, node_less{});
   it = std::min(it, tree + n - 1);
-  const double N = it->n;
-  const double lambda = speciation_rate(pars, *it);
-  return lambda * N * (1.0 - std::exp(-pars[0] * (tree[n - 1].brts - t)));
+  const double lambda = std::max(0.0, pars[1] + pars[2] * it->n);
+  return lambda * it->n * (1.0 - std::exp(-pars[0] * (tree[n - 1].brts - t)));
 }
 
 
@@ -61,9 +59,9 @@ EMP_EXTERN(double) emp_sampling_prob(void**, const double* pars, unsigned n, con
     tips += is_tip(node);
     Ne -= is_extinction(node);
     if (is_missing(node)) {
-      Ne += 1;
       const double lifespann = node.t_ext - node.brts;
       logg += std::log(node.n * pars[0] * lambda) - pars[0] * lifespann - std::log(2.0 * tips + Ne);
+      Ne += 1;
     }
     prev_brts = node.brts;
   }
@@ -83,7 +81,7 @@ EMP_EXTERN(double) emp_loglik(void**, const double* pars, unsigned n, const emp_
     if (is_extinction(node)) {
       ++cex;
     }
-    else {
+    else if (i != n - 1) {
       log_sr += sr;
     }
     inte += (node.brts - prev_brts) * node.n * (sr + pars[0]);
@@ -96,12 +94,12 @@ EMP_EXTERN(double) emp_loglik(void**, const double* pars, unsigned n, const emp_
 
 EMP_EXTERN(void) emp_lower_bound(double* pars)
 {
-  pars[0] = 10e-9; pars[1] = 10e-9; pars[2] = -1.0;
+  pars[0] = 10e-9; pars[1] = 10e-9; pars[2] = -100.0;
 }
 
 
 EMP_EXTERN(void) emp_upper_bound(double* pars)
 {
-  pars[0] = pars[1] = pars[2] = huge;
+  pars[0] = pars[1] = pars[2] = 100;
 }
 
