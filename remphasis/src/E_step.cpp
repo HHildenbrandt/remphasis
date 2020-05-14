@@ -56,8 +56,6 @@ namespace emphasis {
     std::mutex mutex;
     std::atomic<bool> stop{ false };    // non-handled exception
     tree_t init_tree = detail::create_tree(brts, static_cast<double>(soc));
-    std::vector<double> logg_;
-    std::vector<double> logf_;
     auto E = E_step_t{};
     auto T0 = std::chrono::high_resolution_clock::now();
     tbb::parallel_for(tbb::blocked_range<unsigned>(0, maxN), [&](const tbb::blocked_range<unsigned>& r) {
@@ -82,8 +80,8 @@ namespace emphasis {
               if (!stop) {
                 E.trees.emplace_back(pool_tree.cbegin(), pool_tree.cend());
                 E.weights.push_back(log_w);
-                logf_.push_back(logf);
-                logg_.push_back(logg);
+                E.logf.push_back(logf);
+                E.logg.push_back(logg);
                 if (static_cast<int>(E.trees.size()) == N) {
                   stop = true;
                 }
