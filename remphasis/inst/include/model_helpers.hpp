@@ -159,6 +159,24 @@ namespace emphasis {
       const double s_ = 0;
     };
 
+
+    inline double calculate_pd(double tm, unsigned n, const node_t* tree)
+    {
+      double brts = 0.0;
+      double prev_brts = 0;
+      double ni = tree[0].n;
+      double pd = 0.0;
+      for (unsigned i = 0; (i < n) && (tree[i].brts <= tm); ++i) {
+        const auto& node = tree[i];
+        brts = node.brts;
+        if ((node.t_ext > tm)) {
+          pd += (brts - prev_brts) * ni++;
+          prev_brts = brts;
+        }
+      }
+      return pd + (tm - prev_brts) * ni;   // remainder
+    }
+
   }
 
 }

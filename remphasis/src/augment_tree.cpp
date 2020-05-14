@@ -112,6 +112,7 @@ namespace emphasis {
         double next_speciation_time = cbt - std::log(u1) / lambda_max;
         if (next_speciation_time < next_bt) {
           double u2 = std::uniform_real_distribution<>()(reng);
+          // calc pd(next_speciation_time)
           double pt = std::max(0.0, model.nh_rate(state, next_speciation_time, pars, tree)) / lambda_max;
           if (u2 < pt) {
             double extinction_time = model.extinction_time(state, next_speciation_time, pars, tree);
@@ -124,6 +125,9 @@ namespace emphasis {
           }
         }
         cbt = std::min(next_speciation_time, next_bt);
+      }
+      for (auto& node : tree) {
+        node.pd = detail::calculate_pd(node.brts, static_cast<unsigned>(tree.size()), tree.data());
       }
     }
 
@@ -162,6 +166,9 @@ namespace emphasis {
           }
         }
         cbt = std::min(next_speciation_time, next_bt);
+      }
+      for (auto& node : tree) {
+        node.pd = detail::calculate_pd(node.brts, static_cast<unsigned>(tree.size()), tree.data());
       }
     }
 

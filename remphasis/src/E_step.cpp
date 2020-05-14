@@ -38,22 +38,6 @@ namespace emphasis {
       return(tree);
     }
 
-
-    void calculate_pd(tree_t& tree)
-    {
-      double sum = 0.0;
-      double brts0 = 0.0;
-      double ni = tree[0].n;
-      for (auto& node : tree) {
-        const double brts = node.brts;
-        if (detail::is_missing(node)) {
-          sum += (brts - brts0) * ni++;
-          brts0 = brts;
-        }
-        node.pd = sum;
-      }
-    }
-
   }
 
 
@@ -90,7 +74,6 @@ namespace emphasis {
               log_w = logf - logg;
             }
             if (std::isfinite(log_w) && (0.0 < std::exp(log_w))) {
-              detail::calculate_pd(pool_tree);
               std::lock_guard<std::mutex> _(mutex);
               if (!stop) {
                 E.trees.emplace_back(pool_tree.cbegin(), pool_tree.cend());
@@ -125,8 +108,8 @@ namespace emphasis {
       const double w = std::exp(E.weights[i] - max_log_w);
       sum_w += (E.weights[i] = w);
     }
-    E.fhat = std::log(sum_w / (E.weights.size() + E.rejected)) + max_log_w;
     E.rejected = E.rejected_lambda + E.rejected_overruns + E.rejected_zero_weights;
+    E.fhat = std::log(sum_w / (N + E.rejected)) + max_log_w;
     auto T1 = std::chrono::high_resolution_clock::now();
     E.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
     return E;
