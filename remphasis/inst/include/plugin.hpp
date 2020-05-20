@@ -56,15 +56,11 @@ namespace emphasis {
     virtual bool numerical_max_lambda() const { return true; }
     virtual int nparams() const = 0;                                // number of parameters
 
-    // optional per-tree state handling
-    virtual void free_state(void** state) const {}
-    virtual void invalidate_state(void** state) const {}
-
     // diversification model
-    virtual double extinction_time(void** state, double t_speciations, const param_t& pars, const tree_t& tree) const = 0;
-    virtual double nh_rate(void** state, double t, const param_t& pars, const tree_t& tree) const = 0;
-    virtual double sampling_prob(void** state, const param_t& pars, const tree_t& tree) const = 0;
-    virtual double loglik(void** state, const param_t& pars, const tree_t& tree) const = 0;
+    virtual double extinction_time(double t_speciations, const param_t& pars, const tree_t& tree) const = 0;
+    virtual double nh_rate(double t, const param_t& pars, const tree_t& tree) const = 0;
+    virtual double sampling_prob(const param_t& pars, const tree_t& tree) const = 0;
+    virtual double loglik(const param_t& pars, const tree_t& tree) const = 0;
 
     // optional hints for optimization step
     virtual param_t lower_bound() const { return param_t(); }

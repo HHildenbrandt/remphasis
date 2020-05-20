@@ -16,15 +16,15 @@ namespace emphasis {
   namespace {
 
     template <typename Fun>
-    inline double wrap(Fun&& fun, void** state, const param_t& pars, const tree_t& tree)
+    inline double wrap(Fun&& fun, const param_t& pars, const tree_t& tree)
     {
-      return fun(state, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
+      return fun(pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
     }
 
     template <typename Fun>
-    inline double wrap(Fun&& fun, void** state, double t, const param_t& pars, const tree_t& tree)
+    inline double wrap(Fun&& fun, double t, const param_t& pars, const tree_t& tree)
     {
-      return fun(state, t, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
+      return fun(t, pars.data(), static_cast<unsigned>(tree.size()), reinterpret_cast<const emp_node_t*>(tree.data()));
     }
 
   }
@@ -40,8 +40,6 @@ namespace emphasis {
       emp_local_load_address(is_threadsafe, true);
       emp_local_load_address(numerical_max_lambda, true);
       emp_local_load_address(nparams, false);
-      emp_local_load_address(free_state, true);
-      emp_local_load_address(invalidate_state, true);
       emp_local_load_address(extinction_time, false);
       emp_local_load_address(nh_rate, false);
       emp_local_load_address(sampling_prob, false);
@@ -51,14 +49,6 @@ namespace emphasis {
     }
 
     ~dyn_model_t() override {}
-
-    void free_state(void** state) const override {
-      if (free_state_) free_state_(state);
-    }
-
-    void invalidate_state(void** state) const override {
-      if (invalidate_state_) invalidate_state_(state);
-    }
 
     const char* description() const override 
     { 
@@ -80,20 +70,20 @@ namespace emphasis {
       return nparams_(); 
     };
 
-    double extinction_time(void** state, double t_speciation, const param_t& pars, const tree_t& tree) const override {
-      return wrap(extinction_time_, state, t_speciation, pars, tree);
+    double extinction_time(double t_speciation, const param_t& pars, const tree_t& tree) const override {
+      return wrap(extinction_time_, t_speciation, pars, tree);
     }
 
-    double nh_rate(void** state, double t, const param_t& pars, const tree_t& tree) const override {
-      return wrap(nh_rate_, state, t, pars, tree);
+    double nh_rate(double t, const param_t& pars, const tree_t& tree) const override {
+      return wrap(nh_rate_, t, pars, tree);
     }
 
-    double sampling_prob(void** state, const param_t& pars, const tree_t& tree) const override {
-      return wrap(sampling_prob_, state, pars, tree);
+    double sampling_prob(const param_t& pars, const tree_t& tree) const override {
+      return wrap(sampling_prob_, pars, tree);
     }
 
-    double loglik(void** state, const param_t& pars, const tree_t& tree) const override {
-      return wrap(loglik_, state, pars, tree);
+    double loglik(const param_t& pars, const tree_t& tree) const override {
+      return wrap(loglik_, pars, tree);
     }
 
     param_t lower_bound() const override
@@ -121,8 +111,6 @@ namespace emphasis {
     static emp_is_threadsafe_func is_threadsafe_;
     static emp_numerical_max_lambda_func numerical_max_lambda_;
     static emp_nparams_func nparams_;
-    static emp_free_state_func free_state_;
-    static emp_invalidate_state_func invalidate_state_;
     static emp_extinction_time_func extinction_time_;
     static emp_nh_rate_func nh_rate_;
     static emp_sampling_prob_func sampling_prob_;
@@ -136,8 +124,6 @@ namespace emphasis {
   emp_is_threadsafe_func dyn_model_t::is_threadsafe_ = nullptr;
   emp_numerical_max_lambda_func dyn_model_t::numerical_max_lambda_ = nullptr;
   emp_nparams_func dyn_model_t::nparams_ = nullptr;
-  emp_free_state_func dyn_model_t::free_state_ = nullptr;
-  emp_invalidate_state_func dyn_model_t::invalidate_state_ = nullptr;
   emp_extinction_time_func dyn_model_t::extinction_time_ = nullptr;
   emp_nh_rate_func dyn_model_t::nh_rate_ = nullptr;
   emp_sampling_prob_func dyn_model_t::sampling_prob_ = nullptr;

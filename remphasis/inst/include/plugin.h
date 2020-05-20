@@ -63,16 +63,11 @@ typedef bool (*emp_numerical_max_lambda_func)();
 typedef int (*emp_nparams_func)();
 
 
-/* optional per-tree state handling */
-typedef void (*emp_free_state_func)(void**);
-typedef void (*emp_invalidate_state_func)(void**);
-
-
 /* diversification model */
-typedef double (*emp_extinction_time_func)(void**, double, const double*, unsigned, const emp_node_t*);
-typedef double (*emp_nh_rate_func)(void**, double, const double*, unsigned, const emp_node_t*);
-typedef double (*emp_sampling_prob_func)(void**, const double*, unsigned, const emp_node_t*);
-typedef double (*emp_loglik_func)(void**, const double*, unsigned, const emp_node_t*);
+typedef double (*emp_extinction_time_func)(double, const double*, unsigned, const emp_node_t*);
+typedef double (*emp_nh_rate_func)(double, const double*, unsigned, const emp_node_t*);
+typedef double (*emp_sampling_prob_func)(const double*, unsigned, const emp_node_t*);
+typedef double (*emp_loglik_func)(const double*, unsigned, const emp_node_t*);
 
 
 /* optional hints for optimizer */

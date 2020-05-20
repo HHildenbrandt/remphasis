@@ -32,15 +32,17 @@
 #include <array>
 #include <chrono>
 #include <thread>
+#include <numeric>
+#include <algorithm>
 #include "plugin.hpp"
 
 
 #ifndef EMPHASIS_LOGSUM_LOWER_TRESHOLD
-#define EMPHASIS_LOGSUM_LOWER_TRESHOLD 10e-40
+#define EMPHASIS_LOGSUM_LOWER_TRESHOLD 10e-20
 #endif
 
 #ifndef EMPHASIS_LOGSUM_UPPER_TRESHOLD
-#define EMPHASIS_LOGSUM_UPPER_TRESHOLD 10e+40
+#define EMPHASIS_LOGSUM_UPPER_TRESHOLD 10e+20
 #endif
 
 
@@ -94,6 +96,13 @@ namespace emphasis {
     };
 
 
+    inline const node_t* lower_bound_node(double t, unsigned n, const node_t* tree)
+    {
+      auto it = std::lower_bound(tree, tree + n, t, node_less{});
+      return std::min(it, tree + n - 1);
+    }
+
+
     class log_sum
     {
     public:
@@ -125,11 +134,11 @@ namespace emphasis {
 
 
     template <typename RENG>
-    inline double trunc_exp(double lower, double upper, double rate, RENG& reng)
+    inline double trunc_exp(double upper, double rate, RENG& reng)
     {
       std::exponential_distribution<double> exp_dist(rate);
       double result = exp_dist(reng);
-      while (result < lower || result > upper) {
+      while (result > upper) {
         result = exp_dist(reng);
       }
       return result;

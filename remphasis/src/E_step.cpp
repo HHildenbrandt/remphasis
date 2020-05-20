@@ -6,7 +6,6 @@
 #include "emphasis.hpp"
 #include "augment_tree.hpp"
 #include "plugin.hpp"
-#include "state_guard.hpp"
 #include "model_helpers.hpp"
 
 
@@ -71,10 +70,8 @@ namespace emphasis {
             double logf = 0.0;
             double logg = 0.0;
             {
-              state_guard state(model);
-              state.invalidate_state();
-              logf = model->loglik(state, pars, pool_tree);
-              logg = model->sampling_prob(state, pars, pool_tree);
+              logf = model->loglik(pars, pool_tree);
+              logg = model->sampling_prob(pars, pool_tree);
               log_w = logf - logg;
             }
             if (std::isfinite(log_w) && (0.0 < std::exp(log_w))) {

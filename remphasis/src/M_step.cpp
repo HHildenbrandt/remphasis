@@ -18,23 +18,16 @@ namespace emphasis {
     struct nlopt_f_data
     {
       nlopt_f_data(const Model* M, const std::vector<tree_t>& Trees, const std::vector<double>& W)
-        : model(M), state(Trees.size(), nullptr), trees(Trees), w(W)
+        : model(M), trees(Trees), w(W)
       {
-        for (size_t i = 0; i < trees.size(); ++i) {
-          model->invalidate_state(&state[i]);
-        }
       }
 
       ~nlopt_f_data()
       {
         auto empty = tree_t{};
-        for (auto s : state) {
-          model->free_state(&s);
-        }
       }
 
       const Model* model;
-      std::vector<void*> state;
       const std::vector<tree_t>& trees;
       const std::vector<double>& w;
     };
@@ -47,7 +40,7 @@ namespace emphasis {
       const double Q = tbb::parallel_reduce(tbb::blocked_range<size_t>(0, psd->trees.size()), 0.0, 
         [&](const tbb::blocked_range<size_t>& r, double q) -> double {
           for (size_t i = r.begin(); i < r.end(); ++i) {
-            const double loglik = psd->model->loglik(&psd->state[i], pars, psd->trees[i]);
+            const double loglik = psd->model->loglik(pars, psd->trees[i]);
             q += loglik * psd->w[i];
           }
           return q;
