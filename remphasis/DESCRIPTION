@@ -7,8 +7,7 @@ Authors@R: c(person("Francisco","Richter", email = "f.richter@rug.nl", role = c(
                 person("Hanno","Hildenbrandt", email = "h.hildenbrandt@rug.nl", role = c("ctb")))
 Description: Set of statistical tools for the study of diversification of species and ecological drivers of macro-evolution.
 License: GPL (>= 2)
-Depends: nloptr, 
-         Rcpp, 
+Depends: Rcpp, 
          RcppParallel
 Imports: nloptr,
          MASS,
