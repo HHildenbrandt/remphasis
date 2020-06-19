@@ -77,10 +77,10 @@ emphasis <- function(brts,
                   burnin = burnin_iterations)
   
   M <- mc$mcem
-  pars <- c(mean(tail(M$par1, n = nrow(M) / 2)),
-            mean(tail(M$par2, n = nrow(M) / 2)),
-            mean(tail(M$par3, n = nrow(M) / 2)),
-            mean(tail(M$par4, n = nrow(M) / 2)))
+  pars <- c(mean(utils::tail(M$par1, n = nrow(M) / 2)),
+            mean(utils::tail(M$par2, n = nrow(M) / 2)),
+            mean(utils::tail(M$par3, n = nrow(M) / 2)),
+            mean(utils::tail(M$par4, n = nrow(M) / 2)))
   
   cat("\n", msg5, sep = "\n")
   cat("Phase 2: Assesing required MC sampling size \n")
@@ -203,7 +203,7 @@ mcEM_step <- function(brts,
       mcem_est <- mcem[floor(nrow(mcem) / 2):nrow(mcem), ]
       mcem_est <- mcem_est[is.finite(mcem_est$fhat), ]
       #  sde0 = sde
-      sde <- sd(mcem_est$fhat) / sqrt(nrow(mcem_est))
+      sde <- stats::sd(mcem_est$fhat) / sqrt(nrow(mcem_est))
       #  mde = mean(mcem_est$fhat)
       msg <- paste("Iteration:", i, " SE of the loglikelihood: ", sde)
       cat("\r", msg)
@@ -220,7 +220,7 @@ mcEM_step <- function(brts,
 #' this is an internal function
 get_required_sampling_size <- function(M, tol = .05) {
   hlp <- MASS::rlm(M$fhat ~ I(1 / M$sample_size), weights = M$sample_size)
-  ab <- coef(hlp)
+  ab <- stats::coef(hlp)
   f_r <- ab[1] - tol
   n_r <- ceiling(ab[2] / (f_r - ab[1]))
   return(n_r)
