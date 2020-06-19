@@ -1,4 +1,33 @@
-### EMPHASIS functions
+#' Emphasis main function
+#' @description Main function of emphasis, that uses an E-M approach to fit a
+#' diversification model to a phylogenetic tree.
+#' @param brts vector of branching times of the tree for which the model has to
+#' be fitted
+#' @param init_par initial parameter values of the model
+#' @param soc number of species at the root (1) or crown (2). Default is 2.
+#' @param model model to be used
+#' @param lower_bound vector of the lower limit of parameter values used by the
+#' model. Set to -Infinity if left empty.
+#' @param upper_bound vector of the upper limit of parameter values used by the
+#' model. Set to +Infinity if left empty
+#' @param max_lambda maximum speciation rate, default is 500. Should not be set 
+#' too high to avoid extremely long run times
+#' @param xtol tolerance of step size in the M step
+#' @param em_tol tolerance of step size in cycling through EM
+#' @param sample_size_tol tolerance in determining the sample size
+#' @param verbose if TRUE, provides textual output of intermediate steps 
+#' @param return_trees boolean, if TRUE the simulated trees are returned as well
+#' @param max_missing maximum number of tips a tree can be augmented with.
+#' @param burnin_sample_size sample size during burn-in
+#' @param pilot_sample_size vector of sample sizes used to determine the true 
+#' sampling size
+#' @param burnin_iterations number of iterations of the EM algorithm to discard
+#' as burn-in
+#' @param num_threads number of threads to be used. If set to 0, the maximum 
+#' number of threads available is chosen. 
+#' @export
+#' @return a list with two components: 1) \code{pars} contains the average parameter
+#' estimate and 2) \code{MCEM} matrix of parameter estimates and likelihoods.
 emphasis <- function(brts,
                      init_par,
                      soc = 2,
@@ -7,16 +36,21 @@ emphasis <- function(brts,
                      upper_bound = numeric(0),
                      max_lambda = 500,
                      xtol = 0.001,
-                     tol = 0.01,
-                     verbose = FALSE,
                      em_tol = 0.25,
                      sample_size_tol = 0.005,
+                     verbose = FALSE,
                      return_trees = FALSE,
                      max_missing = 10000,  # maximum tree size
                      burnin_sample_size = 200,
                      pilot_sample_size = seq(100, 1000, by = 100),
                      burnin_iterations = 20,
                      num_threads = 0) {
+  
+  if (class(brts) == "phylo") {
+    cat("You have provided the full phylogeny instead of the branching times\n")
+    cat("Emphasis will extract the branching times for your convenience\n")
+    brts <- ape::branching.times(brts)
+  }
   
   msg1 <- paste("Initializing emphasis...")
   msg2 <- paste("Age of the tree: ", max(brts))
@@ -114,7 +148,7 @@ emphasis <- function(brts,
   return(list(pars = pars, MCEM = M))
 }
 
-
+#' @keywords internal
 mcEM_step <- function(brts,
                       pars,
                       sample_size,
@@ -181,8 +215,9 @@ mcEM_step <- function(brts,
   return(list(mcem = mcem))
 }
 
+#' @keywords internal
 get_required_sampling_size <- function(M, tol = .05) {
-  hlp <- MASS:::rlm(M$fhat ~ I(1 / M$sample_size), weights = M$sample_size)
+  hlp <- MASS::rlm(M$fhat ~ I(1 / M$sample_size), weights = M$sample_size)
   ab <- coef(hlp)
   f_r <- ab[1] - tol
   n_r <- ceiling(ab[2] / (f_r - ab[1]))

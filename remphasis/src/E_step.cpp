@@ -117,5 +117,4 @@ namespace emphasis {
     E.elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
     return E;
   }
-
 }
