@@ -149,6 +149,7 @@ emphasis <- function(brts,
 }
 
 #' @keywords internal
+#' this is an internal function
 mcEM_step <- function(brts,
                       pars,
                       sample_size,
@@ -216,6 +217,7 @@ mcEM_step <- function(brts,
 }
 
 #' @keywords internal
+#' this is an internal function
 get_required_sampling_size <- function(M, tol = .05) {
   hlp <- MASS::rlm(M$fhat ~ I(1 / M$sample_size), weights = M$sample_size)
   ab <- coef(hlp)
