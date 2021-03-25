@@ -24,7 +24,7 @@ namespace {
     }
     return trees;
   }
-  
+ 
 }
 
 
@@ -35,7 +35,8 @@ List rcpp_mcm(List e_step,
               const std::vector<double>& lower_bound,  
               const std::vector<double>& upper_bound,  
               double xtol_rel,                     
-              int num_threads)
+              int num_threads,
+              Function rconditional)
 {
   auto E = emphasis::E_step_t{};
   E.trees = pack(as<List>(e_step["trees"]));
@@ -51,8 +52,21 @@ List rcpp_mcm(List e_step,
     throw std::runtime_error("no trees, no optimization");
   }
   auto model = emphasis::create_plugin_model(plugin);
-  auto M = emphasis::M_step(init_pars, E.trees, E.weights, model.get(), lower_bound, upper_bound, xtol_rel, num_threads);
-
+  emphasis::conditional_fun_t conditional{};
+  if (!Rf_isNull(rconditional)) {
+    conditional = [&](const emphasis::param_t pars) {
+      return as<double>( rconditional(NumericVector(pars.cbegin(), pars.cend())) );
+    };
+  }
+  auto M = emphasis::M_step(init_pars, 
+                            E.trees, 
+                            E.weights, 
+                            model.get(), 
+                            lower_bound, 
+                            upper_bound, 
+                            xtol_rel, 
+                            num_threads, 
+                            conditional ? &conditional : nullptr);
   List ret;
   ret["estimates"] = NumericVector(M.estimates.begin(), M.estimates.end());
   ret["nlopt"] = M.opt;

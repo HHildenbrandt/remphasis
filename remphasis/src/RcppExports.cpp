@@ -28,8 +28,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_mcem
-List rcpp_mcem(const std::vector<double>& brts, const std::vector<double>& init_pars, int sample_size, int maxN, const std::string& plugin, int soc, int max_missing, double max_lambda, const std::vector<double>& lower_bound, const std::vector<double>& upper_bound, double xtol_rel, int num_threads, bool copy_trees);
-RcppExport SEXP _remphasis_rcpp_mcem(SEXP brtsSEXP, SEXP init_parsSEXP, SEXP sample_sizeSEXP, SEXP maxNSEXP, SEXP pluginSEXP, SEXP socSEXP, SEXP max_missingSEXP, SEXP max_lambdaSEXP, SEXP lower_boundSEXP, SEXP upper_boundSEXP, SEXP xtol_relSEXP, SEXP num_threadsSEXP, SEXP copy_treesSEXP) {
+List rcpp_mcem(const std::vector<double>& brts, const std::vector<double>& init_pars, int sample_size, int maxN, const std::string& plugin, int soc, int max_missing, double max_lambda, const std::vector<double>& lower_bound, const std::vector<double>& upper_bound, double xtol_rel, int num_threads, bool copy_trees, Function rconditional);
+RcppExport SEXP _remphasis_rcpp_mcem(SEXP brtsSEXP, SEXP init_parsSEXP, SEXP sample_sizeSEXP, SEXP maxNSEXP, SEXP pluginSEXP, SEXP socSEXP, SEXP max_missingSEXP, SEXP max_lambdaSEXP, SEXP lower_boundSEXP, SEXP upper_boundSEXP, SEXP xtol_relSEXP, SEXP num_threadsSEXP, SEXP copy_treesSEXP, SEXP rconditionalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,13 +46,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type xtol_rel(xtol_relSEXP);
     Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
     Rcpp::traits::input_parameter< bool >::type copy_trees(copy_treesSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_mcem(brts, init_pars, sample_size, maxN, plugin, soc, max_missing, max_lambda, lower_bound, upper_bound, xtol_rel, num_threads, copy_trees));
+    Rcpp::traits::input_parameter< Function >::type rconditional(rconditionalSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_mcem(brts, init_pars, sample_size, maxN, plugin, soc, max_missing, max_lambda, lower_bound, upper_bound, xtol_rel, num_threads, copy_trees, rconditional));
     return rcpp_result_gen;
 END_RCPP
 }
 // rcpp_mcm
-List rcpp_mcm(List e_step, const std::vector<double>& init_pars, const std::string& plugin, const std::vector<double>& lower_bound, const std::vector<double>& upper_bound, double xtol_rel, int num_threads);
-RcppExport SEXP _remphasis_rcpp_mcm(SEXP e_stepSEXP, SEXP init_parsSEXP, SEXP pluginSEXP, SEXP lower_boundSEXP, SEXP upper_boundSEXP, SEXP xtol_relSEXP, SEXP num_threadsSEXP) {
+List rcpp_mcm(List e_step, const std::vector<double>& init_pars, const std::string& plugin, const std::vector<double>& lower_bound, const std::vector<double>& upper_bound, double xtol_rel, int num_threads, Function rconditional);
+RcppExport SEXP _remphasis_rcpp_mcm(SEXP e_stepSEXP, SEXP init_parsSEXP, SEXP pluginSEXP, SEXP lower_boundSEXP, SEXP upper_boundSEXP, SEXP xtol_relSEXP, SEXP num_threadsSEXP, SEXP rconditionalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -63,15 +64,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::vector<double>& >::type upper_bound(upper_boundSEXP);
     Rcpp::traits::input_parameter< double >::type xtol_rel(xtol_relSEXP);
     Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_mcm(e_step, init_pars, plugin, lower_bound, upper_bound, xtol_rel, num_threads));
+    Rcpp::traits::input_parameter< Function >::type rconditional(rconditionalSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_mcm(e_step, init_pars, plugin, lower_bound, upper_bound, xtol_rel, num_threads, rconditional));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_remphasis_rcpp_mce", (DL_FUNC) &_remphasis_rcpp_mce, 12},
-    {"_remphasis_rcpp_mcem", (DL_FUNC) &_remphasis_rcpp_mcem, 13},
-    {"_remphasis_rcpp_mcm", (DL_FUNC) &_remphasis_rcpp_mcm, 7},
+    {"_remphasis_rcpp_mcem", (DL_FUNC) &_remphasis_rcpp_mcem, 14},
+    {"_remphasis_rcpp_mcm", (DL_FUNC) &_remphasis_rcpp_mcm, 8},
     {NULL, NULL, 0}
 };
 

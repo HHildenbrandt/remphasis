@@ -25,6 +25,8 @@
 #' as burn-in
 #' @param num_threads number of threads to be used. If set to 0, the maximum 
 #' number of threads available is chosen. 
+#' @param conditional a function that takes a parameter set as argument and returns
+#' conditional probability. 
 #' @export
 #' @return a list with two components: 1) \code{pars} contains the average parameter
 #' estimate and 2) \code{MCEM} matrix of parameter estimates and likelihoods.
@@ -44,8 +46,12 @@ emphasis <- function(brts,
                      burnin_sample_size = 200,
                      pilot_sample_size = seq(100, 1000, by = 100),
                      burnin_iterations = 20,
-                     num_threads = 0) {
+                     num_threads = 0,
+                     conditional = NULL) {
   
+  if (NULL != conditional) {
+    stopIfnot(class(conditional) == "function")
+  }
   if (class(brts) == "phylo") {
     cat("You have provided the full phylogeny instead of the branching times\n")
     cat("Emphasis will extract the branching times for your convenience\n")
@@ -74,7 +80,8 @@ emphasis <- function(brts,
                   return_trees = FALSE,
                   verbose = FALSE,
                   tol = em_tol,
-                  burnin = burnin_iterations)
+                  burnin = burnin_iterations,
+                  conditional)
   
   M <- mc$mcem
   pars <- c(mean(utils::tail(M$par1, n = nrow(M) / 2)),
@@ -101,7 +108,8 @@ emphasis <- function(brts,
                     return_trees = FALSE,
                     verbose = FALSE,
                     tol = em_tol,
-                    burnin = 10)
+                    burnin = 10,
+                    conditional)
     
     ta <- tail(mc$mcem, n = nrow(M) / 2)
     pars <- c(mean(ta$par1),
@@ -133,7 +141,8 @@ emphasis <- function(brts,
                     return_trees = FALSE,
                     verbose = FALSE,
                     tol = em_tol,
-                    burnin = 2)
+                    burnin = 2,
+                    conditional)
     
     M <- rbind(M, mc$mcem)
     n.r_old <- n.r
@@ -164,7 +173,8 @@ mcEM_step <- function(brts,
                       burnin,
                       num_threads,
                       return_trees,
-                      verbose) {
+                      verbose,
+                      conditional) {
   mcem <- NULL
   sde <- 10
   i <- 0
@@ -183,7 +193,8 @@ mcEM_step <- function(brts,
                                  upper_bound,
                                  xtol_rel = xtol,                   
                                  num_threads,
-                                 return_trees)
+                                 return_trees,
+                                 conditional)
     pars <- results$estimates
     mcem <- rbind(mcem, data.frame(par1 = pars[1],
                                    par2 = pars[2],

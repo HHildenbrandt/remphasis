@@ -30,6 +30,7 @@
 #include <limits>
 #include <memory>
 #include <vector>
+#include <functional>
 #include "plugin.hpp"
 
 
@@ -92,6 +93,9 @@ namespace emphasis {
   };
 
 
+  using conditional_fun_t = std::function<double(const param_t&)>;
+  
+  
   M_step_t M_step(const param_t& pars,
                   const std::vector<tree_t>& trees,          // augmented trees
                   const std::vector<double>& weights,
@@ -99,7 +103,8 @@ namespace emphasis {
                   const param_t& lower_bound = {}, // overrides model.lower_bound
                   const param_t& upper_bound = {}, // overrides model.upper.bound
                   double xtol_rel = 0.001,
-                  int num_threads = 0);
+                  int num_threads = 0,
+                  conditional_fun_t* conditional = nullptr);
 
 
   // results from mcem
@@ -116,7 +121,7 @@ namespace emphasis {
     M_step_t m;
   };
 
-
+  
   mcem_t mcem(int N,      // sample size
               int maxN,   // max. number of augmented trees (incl. invalid)
               const param_t& pars,
@@ -128,7 +133,8 @@ namespace emphasis {
               const param_t& lower_bound = {}, // overrides model.lower_bound
               const param_t& upper_bound = {}, // overrides model.upper.bound
               double xtol_rel = 0.001,
-              int num_threads = 0);
+              int num_threads = 0,
+              conditional_fun_t* conditional = nullptr);
 
 
   std::unique_ptr<class Model> create_plugin_model(const std::string& model_dll);

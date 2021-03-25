@@ -2,6 +2,7 @@
 #include <atomic>
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include "emphasis.hpp"
 #include "plugin.hpp"
 #include "augment_tree.hpp"
@@ -41,13 +42,14 @@ namespace emphasis {
               const param_t& lower_bound, // overrides model.lower_bound
               const param_t& upper_bound, // overrides model.upper.bound
               double xtol,
-              int num_threads)
+              int num_threads,
+              conditional_fun_t* conditional)
   {
     auto EM = mcem_t();
     EM.e = E_step(N, maxN, pars, brts, model, soc, max_missing, max_lambda, num_threads);
     // optimize
     if (!EM.e.trees.empty()) {
-      EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, num_threads);
+      EM.m = M_step(pars, EM.e.trees, EM.e.weights, model, lower_bound, upper_bound, xtol, num_threads, conditional);
     }
     return EM;
   }

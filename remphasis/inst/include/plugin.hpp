@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 #include "plugin.h"   // emp_node_t
 
 
@@ -42,6 +43,8 @@ namespace emphasis {
   constexpr double t_ext_tip = emp_t_ext_tip;           // t_ext for present nodes
   constexpr double t_ext_extinct = emp_t_ext_extinct;   // t_ext for extinction nodes
 
+  
+  
 
   // abstract diversification model
   class Model
