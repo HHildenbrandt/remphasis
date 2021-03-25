@@ -38,5 +38,20 @@ show(em)
 
 e <- e_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 0)
 m <- m_cpp(e, pars, so, vector(), vector(), 0.001, 0) 
-show(e)
-show(m)
+#show(e)
+#show(m)
+
+
+# check conditional closure
+condClosure = function(gam = NULL) {
+  function(pars) {
+    # use gam
+    cat("conditional gets: ", pars, "\n", sep=" ")
+    return(1)
+  }
+}
+
+
+m <- m_cpp(e, pars, so, vector(), vector(), 0.001, 0, condClosure()) 
+#show(e)
+#show(m)

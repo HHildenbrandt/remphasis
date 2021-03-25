@@ -36,7 +36,7 @@ List rcpp_mcm(List e_step,
               const std::vector<double>& upper_bound,  
               double xtol_rel,                     
               int num_threads,
-              Function rconditional)
+              Nullable<Function> rconditional = R_NilValue)
 {
   auto E = emphasis::E_step_t{};
   E.trees = pack(as<List>(e_step["trees"]));
@@ -53,9 +53,9 @@ List rcpp_mcm(List e_step,
   }
   auto model = emphasis::create_plugin_model(plugin);
   emphasis::conditional_fun_t conditional{};
-  if (!Rf_isNull(rconditional)) {
-    conditional = [&](const emphasis::param_t pars) {
-      return as<double>( rconditional(NumericVector(pars.cbegin(), pars.cend())) );
+  if (rconditional.isNotNull()) {
+    conditional = [&](const emphasis::param_t& pars) {
+      return as<double>( Function(rconditional)(NumericVector(pars.cbegin(), pars.cend())) );
     };
   }
   auto M = emphasis::M_step(init_pars, 

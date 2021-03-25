@@ -36,14 +36,13 @@ List rcpp_mcem(const std::vector<double>& brts,
                double xtol_rel,                     
                int num_threads,
                bool copy_trees,
-               Function rconditional) 
+               Nullable<Function> rconditional = R_NilValue) 
 {
   auto model = emphasis::create_plugin_model(plugin);
-
   emphasis::conditional_fun_t conditional{};
-  if (!Rf_isNull(rconditional)) {
-    conditional = [&](const emphasis::param_t pars) {
-      return as<double>( rconditional(NumericVector(pars.cbegin(), pars.cend())) );
+  if (rconditional.isNotNull()) {
+    conditional = [&](const emphasis::param_t& pars) {
+      return as<double>( Function(rconditional)(NumericVector(pars.cbegin(), pars.cend())) );
     };
   }
   auto mcem = emphasis::mcem(sample_size,

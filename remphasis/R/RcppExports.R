@@ -5,11 +5,11 @@ e_cpp <- function(brts, init_pars, sample_size, maxN, plugin, soc, max_missing, 
     .Call(`_remphasis_rcpp_mce`, brts, init_pars, sample_size, maxN, plugin, soc, max_missing, max_lambda, lower_bound, upper_bound, xtol_rel, num_threads)
 }
 
-em_cpp <- function(brts, init_pars, sample_size, maxN, plugin, soc, max_missing, max_lambda, lower_bound, upper_bound, xtol_rel, num_threads, copy_trees, rconditional) {
+em_cpp <- function(brts, init_pars, sample_size, maxN, plugin, soc, max_missing, max_lambda, lower_bound, upper_bound, xtol_rel, num_threads, copy_trees, rconditional = NULL) {
     .Call(`_remphasis_rcpp_mcem`, brts, init_pars, sample_size, maxN, plugin, soc, max_missing, max_lambda, lower_bound, upper_bound, xtol_rel, num_threads, copy_trees, rconditional)
 }
 
-m_cpp <- function(e_step, init_pars, plugin, lower_bound, upper_bound, xtol_rel, num_threads, rconditional) {
+m_cpp <- function(e_step, init_pars, plugin, lower_bound, upper_bound, xtol_rel, num_threads, rconditional = NULL) {
     .Call(`_remphasis_rcpp_mcm`, e_step, init_pars, plugin, lower_bound, upper_bound, xtol_rel, num_threads, rconditional)
 }
 
