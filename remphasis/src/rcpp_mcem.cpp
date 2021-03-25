@@ -1,4 +1,4 @@
-// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::plugins(cpp14)]]
 #include <Rcpp.h>
 #include "emphasis.hpp"
 #include "plugin.hpp"
@@ -41,8 +41,8 @@ List rcpp_mcem(const std::vector<double>& brts,
   auto model = emphasis::create_plugin_model(plugin);
   emphasis::conditional_fun_t conditional{};
   if (rconditional.isNotNull()) {
-    conditional = [&](const emphasis::param_t& pars) {
-      return as<double>( Function(rconditional)(NumericVector(pars.cbegin(), pars.cend())) );
+    conditional = [cond= Function(rconditional)](const emphasis::param_t& pars) {
+      return as<double>( cond(NumericVector(pars.cbegin(), pars.cend())) );
     };
   }
   auto mcem = emphasis::mcem(sample_size,

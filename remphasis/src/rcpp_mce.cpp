@@ -1,4 +1,4 @@
-// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::plugins(cpp14)]]
 #include <Rcpp.h>
 #include "emphasis.hpp"
 #include "plugin.hpp"
