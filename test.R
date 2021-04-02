@@ -2,6 +2,8 @@ library(remphasis)
 library(remphasisrpd1)
 library(remphasisrpd5c)
 
+
+
 brts_Megapodiidae = c(
 	35.012472823,
 	32.530356812,
@@ -33,25 +35,30 @@ cat('model: rpd1 ', so, '\n')
 cat('sample size: ', sample_size, '\n')
 cat('initial pars:', pars, '\n')
 
-em <- em_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 0, FALSE)
-show(em)
+#em <- em_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 0, FALSE)
+#show(em)
 
-e <- e_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 0)
+#e <- e_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 0)
 #m <- m_cpp(e, pars, so, vector(), vector(), 0.001, 0) 
 #show(e)
 #show(m)
 
 
 # conditional closure
-cond_closure = function(gam = NULL) {
+cond_closure = function(gam) {
   function(pars) {
-    # use gam
-    cat("conditional gets: ", pars, "\n", sep=" ")
-    return(1)
+    pr = as.numeric(mgcv:::predict.gam(gam,
+                                       newdata = data.frame(mu=pars[1],
+                                                            lambda=pars[2],
+                                                            betaN=pars[3],
+                                                            betaP=pars[4]),
+                                       type = "response"))
+    return(pr)
   }
 }
 
 
-m <- m_cpp(e, pars, so, vector(), vector(), 0.001, 0, cond_closure()) 
+e <- e_cpp(brts_Megapodiidae, pars, sample_size, 10*sample_size, so, 2, 10000, 500, vector(), vector(), 0.001, 0)
+m <- m_cpp(e, pars, so, vector(), vector(), 0.001, 0, cond_closure(srv.gam)) 
 #show(e)
 #show(m)
