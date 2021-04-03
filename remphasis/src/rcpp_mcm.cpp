@@ -1,4 +1,5 @@
 // [[Rcpp::plugins(cpp14)]]
+
 #include <Rcpp.h>
 #include "emphasis.hpp"
 #include "plugin.hpp"
@@ -17,7 +18,7 @@ namespace {
       auto brts = as<NumericVector>(df["brts"]);
       auto n = as<NumericVector>(df["n"]);
       auto t_ext = as<NumericVector>(df["t_ext"]);
-      for (size_t i = 0; i < brts.size(); ++i) {
+      for (auto i = 0; i < brts.size(); ++i) {
         tree.push_back(emphasis::node_t{brts[i], n[i], t_ext[i], 0.0});
       }
       trees.emplace_back(std::move(tree));
