@@ -1,7 +1,7 @@
 Package: remphasis
 Type: Package
 Title: Expectation Maximization on Phylogenetic Applications with Simulations and Importance Sampling
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: c(person("Francisco","Richter", email = "f.richter@rug.nl", role = c("aut", "cre")),
                 person("Thijs","Janzen", email = "t.janzen@rug.nl", role=c("ctb")),
                 person("Hanno","Hildenbrandt", email = "h.hildenbrandt@rug.nl", role = c("ctb")))
@@ -16,5 +16,6 @@ Imports: nloptr,
 LinkingTo: Rcpp, 
            RcppParallel, 
            nloptr
-SystemRequirements: GNU make
+Suggests: TreeSim
+SystemRequirements: C++14
 RoxygenNote: 7.1.1
