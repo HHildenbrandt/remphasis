@@ -50,7 +50,7 @@ emphasis <- function(brts,
                      conditional = NULL) {
   
   if (NULL != conditional) {
-    stopIfnot(class(conditional) == "function")
+    stopifnot(class(conditional) == "function")
   }
   if (class(brts) == "phylo") {
     cat("You have provided the full phylogeny instead of the branching times\n")
