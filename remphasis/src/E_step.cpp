@@ -8,6 +8,7 @@
 #include "plugin.hpp"
 #include "model_helpers.hpp"
 
+
 namespace emphasis {
   namespace detail {
     // this little addition reduces the load to memory allocator massively.

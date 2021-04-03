@@ -53,8 +53,8 @@ struct emp_node_t
 };
 
 
-#define emp_t_ext_tip 10e10;     /* t_ext for present nodes */
-#define emp_t_ext_extinct 0.0;   /* t_ext for extinction nodes */
+#define emp_t_ext_tip 10e10     /* t_ext for present nodes */
+#define emp_t_ext_extinct 0.0   /* t_ext for extinction nodes */
 
 
 typedef const char* (*emp_description_func)();

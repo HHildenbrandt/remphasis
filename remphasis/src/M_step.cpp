@@ -5,6 +5,7 @@
 #include <cmath>  
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include <tbb/tbb.h>
 #include "plugin.hpp"
 #include "emphasis.hpp"
@@ -17,8 +18,11 @@ namespace emphasis {
 
     struct nlopt_f_data
     {
-      nlopt_f_data(const Model* M, const std::vector<tree_t>& Trees, const std::vector<double>& W)
-        : model(M), trees(Trees), w(W)
+      nlopt_f_data(const Model* M, 
+                   const std::vector<tree_t>& Trees, 
+                   const std::vector<double>& W,
+                   conditional_fun_t* Conditional)
+        : model(M), trees(Trees), w(W), conditional(Conditional)
       {
       }
 
@@ -30,6 +34,7 @@ namespace emphasis {
       const Model* model;
       const std::vector<tree_t>& trees;
       const std::vector<double>& w;
+      conditional_fun_t* conditional;
     };
 
 
@@ -47,9 +52,12 @@ namespace emphasis {
         },
         std::plus<double>{}
       );
-      return -Q;
+      if (nullptr == psd->conditional) {
+        return -Q;
+      }
+      return -Q * psd->conditional->operator()(pars);
     }
-
+    
   }
 
 
@@ -60,12 +68,13 @@ namespace emphasis {
                   const param_t& lower_bound, // overrides model.lower_bound
                   const param_t& upper_bound, // overrides model.upper.bound
                   double xtol_rel,
-                  int num_threads)
+                  int num_threads,
+                  conditional_fun_t* conditional)
   {
     if (!model->is_threadsafe()) num_threads = 1;
     tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
     auto T0 = std::chrono::high_resolution_clock::now();
-    nlopt_f_data sd{ model, trees, weights };
+    nlopt_f_data sd{ model, trees, weights, conditional };
     auto M = M_step_t{};
     sbplx nlopt(pars.size());
     M.estimates = pars;

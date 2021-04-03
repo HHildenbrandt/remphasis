@@ -1,4 +1,5 @@
-// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::plugins(cpp14)]]
+
 #include <Rcpp.h>
 #include "emphasis.hpp"
 #include "plugin.hpp"
@@ -35,9 +36,16 @@ List rcpp_mcem(const std::vector<double>& brts,
                const std::vector<double>& upper_bound,  
                double xtol_rel,                     
                int num_threads,
-               bool copy_trees) 
+               bool copy_trees,
+               Nullable<Function> rconditional = R_NilValue) 
 {
   auto model = emphasis::create_plugin_model(plugin);
+  emphasis::conditional_fun_t conditional{};
+  if (rconditional.isNotNull()) {
+    conditional = [cond= Function(rconditional)](const emphasis::param_t& pars) {
+      return as<double>( cond(NumericVector(pars.cbegin(), pars.cend())) );
+    };
+  }
   auto mcem = emphasis::mcem(sample_size,
                              maxN,
                              init_pars,
@@ -49,7 +57,8 @@ List rcpp_mcem(const std::vector<double>& brts,
                              lower_bound,
                              upper_bound,
                              xtol_rel,
-                             num_threads);
+                             num_threads,
+                             conditional ? &conditional : nullptr);
   if (mcem.e.trees.empty()) {
     throw std::runtime_error("no trees, no optimization");
   }

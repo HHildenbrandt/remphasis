@@ -21,7 +21,8 @@ emphasis(
   burnin_sample_size = 200,
   pilot_sample_size = seq(100, 1000, by = 100),
   burnin_iterations = 20,
-  num_threads = 0
+  num_threads = 0,
+  conditional = NULL
 )
 }
 \arguments{
@@ -65,6 +66,9 @@ as burn-in}
 
 \item{num_threads}{number of threads to be used. If set to 0, the maximum 
 number of threads available is chosen.}
+
+\item{conditional}{a function that takes a parameter set as argument and returns
+conditional probability.}
 }
 \value{
 a list with two components: 1) \code{pars} contains the average parameter
